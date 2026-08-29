@@ -1,0 +1,38 @@
+# Operating System Files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE & Text Editor Files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Environment & Secrets (NEVER COMMIT THESE)
+.env
+.env.local
+*.pem
+*.key
+
+# Node.js & Web
+node_modules/
+dist/
+build/
+npm-debug.log*
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+*.venv
+
+# Java / Maven / Gradle
+target/
+.gradle/
+build/
+*.class
+*.jar
+*.war
