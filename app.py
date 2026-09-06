@@ -6,7 +6,7 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 
-st.set_page_config(page_title="Team 3 IT5006 Dashboard", layout="wide")
+st.set_page_config(page_title="Team 3 IT5006 Dashboard 2", layout="wide")
 
 DATA_DIR = "Olist_data"
 UNTRANSLATED_LABEL = "untranslated / missing"
