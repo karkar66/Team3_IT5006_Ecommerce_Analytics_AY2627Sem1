@@ -21,7 +21,7 @@ ORDINAL_BLUE = ["#86b6ef", "#5598e7", "#2a78d6", "#1c5cab", "#0d366b"]  # light 
 SURFACE = "#fcfcfb"
 GRID = "#e1e0d9"
 INK = "#0b0b0b"
-MUTED = "#898781"
+MUTED = "#898790"
 
 
 def style_fig(fig, title=None, xaxis_title=None, yaxis_title=None, showlegend=None, height=380):
