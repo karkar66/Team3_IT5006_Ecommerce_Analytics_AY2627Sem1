@@ -18,6 +18,7 @@ CATEGORICAL = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4", "#008300",
 BLUE = CATEGORICAL[0]      # primary metric
 ORANGE = CATEGORICAL[1]    # secondary / comparison metric
 ORDINAL_BLUE = ["#86b6ef", "#5598e7", "#2a78d6", "#1c5cab", "#0d366b"]  # light -> dark, ordered scores
+SEQUENTIAL_BLUE = ["#cde2fb", "#b7d3f6", "#9ec5f4", "#6da7ec", "#3987e5", "#256abf", "#184f95", "#0d366b"]  # continuous magnitude (heatmaps, choropleths)
 SURFACE = "#fcfcfb"
 GRID = "#e1e0d9"
 INK = "#0b0b0b"
@@ -112,6 +113,7 @@ def load_data(data_dir):
             on="order_id", how="left",
         )
         .merge(olist["customers"][["customer_id", "customer_state"]], on="customer_id", how="left")
+        .merge(olist["sellers"][["seller_id", "seller_state"]], on="seller_id", how="left")
         .merge(dominant_payment, on="order_id", how="left")
         .merge(installments, on="order_id", how="left")
         .merge(reviews, on="order_id", how="left")
@@ -149,16 +151,36 @@ def get_filter_options(df):
         "statuses": sorted(df["order_status"].dropna().unique()),
         "categories": sorted(df["product_category_name_english"].dropna().unique()),
         "states": sorted(df["customer_state"].dropna().unique()),
+        "seller_states": sorted(df["seller_state"].dropna().unique()),
         "payment_types": sorted(df["payment_type"].dropna().unique()),
+        "review_scores": REVIEW_SCORE_LABELS,
     }
 
 
 ALL_LABEL = "ALL"
+NO_SCORE_LABEL = "No score"
+REVIEW_SCORE_LABELS = [NO_SCORE_LABEL, "1", "2", "3", "4", "5"]
+
+
+def _toggle_all(key):
+    """Keep ALL and specific values mutually exclusive: picking one drops the other."""
+    selected = st.session_state.get(key, [])
+    if not selected:
+        st.session_state[key] = [ALL_LABEL]
+        return
+    if selected[-1] == ALL_LABEL:
+        st.session_state[key] = [ALL_LABEL]
+    elif ALL_LABEL in selected:
+        st.session_state[key] = [v for v in selected if v != ALL_LABEL]
 
 
 def multiselect_all(label, options, key):
     """Multiselect that shows a single 'ALL' tag by default instead of every option."""
-    selected = st.sidebar.multiselect(label, [ALL_LABEL] + options, default=[ALL_LABEL], key=key)
+    st.session_state.setdefault(key, [ALL_LABEL])
+    selected = st.sidebar.multiselect(
+        label, [ALL_LABEL] + options, key=key,
+        on_change=_toggle_all, args=(key,),
+    )
     if not selected or ALL_LABEL in selected:
         return options
     return selected
@@ -185,26 +207,39 @@ def render_sidebar(df):
     statuses = multiselect_all("Order status", opts["statuses"], key="statuses")
     categories = multiselect_all("Product category", opts["categories"], key="categories")
     states = multiselect_all("Customer state", opts["states"], key="states")
+    seller_states = multiselect_all("Seller state", opts["seller_states"], key="seller_states")
     payment_types = multiselect_all("Payment method", opts["payment_types"], key="payment_types")
+    review_scores = multiselect_all("Review score", opts["review_scores"], key="review_scores")
 
     return {
         "date_range": date_range,
         "statuses": statuses,
         "categories": categories,
         "states": states,
+        "seller_states": seller_states,
         "payment_types": payment_types,
+        "review_scores": review_scores,
     }
 
 
 def apply_filters(df, filters):
     start_date, end_date = filters["date_range"]
+
+    selected_scores = filters["review_scores"]
+    numeric_scores = [int(s) for s in selected_scores if s != NO_SCORE_LABEL]
+    score_mask = df["review_score"].isin(numeric_scores)
+    if NO_SCORE_LABEL in selected_scores:
+        score_mask |= df["review_score"].isna()
+
     mask = (
         (df["order_purchase_timestamp"].dt.date >= start_date)
         & (df["order_purchase_timestamp"].dt.date <= end_date)
         & (df["order_status"].isin(filters["statuses"]))
         & (df["product_category_name_english"].isin(filters["categories"]))
         & (df["customer_state"].isin(filters["states"]))
+        & (df["seller_state"].isin(filters["seller_states"]))
         & (df["payment_type"].isin(filters["payment_types"]))
+        & score_mask
     )
     return df.loc[mask].copy()
 
@@ -212,6 +247,15 @@ def apply_filters(df, filters):
 # ---------------------------------------------------------------------------
 # KPI banner
 # ---------------------------------------------------------------------------
+def format_currency_compact(value):
+    """Abbreviate large currency values (R$ 15.2M) so KPI tiles don't overflow on narrow screens."""
+    if value >= 1_000_000:
+        return f"R$ {value / 1_000_000:,.2f}M"
+    if value >= 1_000:
+        return f"R$ {value / 1_000:,.1f}K"
+    return f"R$ {value:,.0f}"
+
+
 def render_kpis(df):
     if df.empty:
         st.warning("No data matches the selected filters.")
@@ -226,7 +270,7 @@ def render_kpis(df):
     on_time_rate = delivered["is_on_time"].mean() if not delivered.empty else float("nan")
 
     c1, c2, c3, c4, c5 = st.columns(5)
-    c1.metric("Total Revenue", f"R$ {total_revenue:,.0f}")
+    c1.metric("Total Revenue", format_currency_compact(total_revenue))
     c2.metric("Total Orders", f"{total_orders:,}")
     c3.metric("Avg Order Value", f"R$ {aov:,.2f}")
     c4.metric("Avg Review Score", f"{avg_review:.2f} / 5" if pd.notna(avg_review) else "N/A")
@@ -313,6 +357,60 @@ def render_logistics_tab(df):
                                 color_discrete_sequence=[ORANGE])
         style_fig(fig_state_rev, title="Top 10 States by Revenue", xaxis_title="Revenue (R$)", yaxis_title="")
         st.plotly_chart(fig_state_rev, use_container_width=True)
+
+    st.subheader("Order Volume: Customer State vs. Seller State")
+    top_customer_states = df.groupby("customer_state")["order_id"].nunique().nlargest(10).index.tolist()
+    top_seller_states = df.groupby("seller_state")["order_id"].nunique().nlargest(10).index.tolist()
+
+    def anchor_order(states, first, last):
+        """Alphabetical order with `first`/`last` pinned to the opposite ends (if present)."""
+        middle = sorted(s for s in states if s not in (first, last))
+        return [s for s in [first] if s in states] + middle + [s for s in [last] if s in states]
+
+    customer_order = anchor_order(top_customer_states, "BA", "SP")
+    seller_order = anchor_order(top_seller_states, "SP", "BA")
+
+    state_pairs = (
+        df[df["customer_state"].isin(top_customer_states) & df["seller_state"].isin(top_seller_states)]
+        .groupby(["seller_state", "customer_state"], as_index=False)["order_id"]
+        .nunique()
+        .rename(columns={"order_id": "orders"})
+    )
+    if state_pairs.empty:
+        st.info("No data matches the selected filters.")
+    else:
+        pivot = (
+            state_pairs.pivot(index="seller_state", columns="customer_state", values="orders")
+            .reindex(index=seller_order, columns=customer_order)
+            .fillna(0)
+            .astype(int)
+        )
+        fig_heatmap = px.imshow(pivot, color_continuous_scale=SEQUENTIAL_BLUE, aspect="auto", text_auto=True)
+        fig_heatmap.update_traces(hovertemplate="Customer: %{x}<br>Seller: %{y}<br>Orders: %{z:,.0f}<extra></extra>")
+        style_fig(fig_heatmap, title="Order Volume: Top 10 Customer States vs. Top 10 Seller States",
+                  xaxis_title="Customer State", yaxis_title="Seller State", height=420)
+        st.plotly_chart(fig_heatmap, use_container_width=True)
+
+    st.subheader("Delivery Performance: Customer State vs. Seller State")
+    delivered_orders = df[df["order_status"] == "delivered"]
+    performance_pairs = (
+        delivered_orders.groupby(["seller_state", "customer_state"], as_index=False)["is_on_time"]
+        .mean()
+        .rename(columns={"is_on_time": "on_time_rate"})
+    )
+    if performance_pairs.empty:
+        st.info("No delivered orders in the current filter selection.")
+    else:
+        perf_pivot = (
+            performance_pairs.pivot(index="seller_state", columns="customer_state", values="on_time_rate")
+            .reindex(index=seller_order, columns=customer_order)
+        )
+        fig_perf = px.imshow(perf_pivot, color_continuous_scale=SEQUENTIAL_BLUE, aspect="auto",
+                              text_auto=".1%", zmin=0, zmax=1)
+        fig_perf.update_traces(hovertemplate="Customer: %{x}<br>Seller: %{y}<br>On-time: %{z:.1%}<extra></extra>")
+        style_fig(fig_perf, title="Delivery Performance (% On-Time) Between Top 10 Customer and Seller States",
+                  xaxis_title="Customer State", yaxis_title="Seller State", height=420)
+        st.plotly_chart(fig_perf, use_container_width=True)
 
     st.subheader("Delivery Lead Time: Actual vs. Estimated")
     delivered = df[df["order_delivered_customer_date"].notna()].drop_duplicates("order_id")
