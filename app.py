@@ -91,6 +91,12 @@ def load_data(data_dir):
         olist["category_translation"], on="product_category_name", how="left"
     )
     products["product_category_name_english"] = products["product_category_name_english"].fillna(UNTRANSLATED_LABEL)
+    products["product_volume_cm3"] = (
+        products["product_length_cm"] * products["product_height_cm"] * products["product_width_cm"]
+    )
+    products["product_weight_g"] = products["product_weight_g"].fillna(0)
+    products["product_volume_cm3"] = products["product_volume_cm3"].fillna(0)
+    products["product_weight_volume"] = products["product_weight_g"] * products["product_volume_cm3"]
 
     # A single order can have several payment rows (split payments) - collapse to one row per order.
     payments = olist["payments"]
@@ -105,7 +111,10 @@ def load_data(data_dir):
 
     df = (
         olist["order_items"]
-        .merge(products[["product_id", "product_category_name_english"]], on="product_id", how="left")
+        .merge(
+            products[["product_id", "product_category_name_english", "product_weight_volume"]],
+            on="product_id", how="left",
+        )
         .merge(
             olist["orders"][["order_id", "customer_id", "order_status",
                               "order_purchase_timestamp", "order_delivered_customer_date",
@@ -154,6 +163,8 @@ def get_filter_options(df):
         "seller_states": sorted(df["seller_state"].dropna().unique()),
         "payment_types": sorted(df["payment_type"].dropna().unique()),
         "review_scores": REVIEW_SCORE_LABELS,
+        "min_weight_volume": int(df["product_weight_volume"].min()),
+        "max_weight_volume": int(df["product_weight_volume"].max()),
     }
 
 
@@ -211,6 +222,12 @@ def render_sidebar(df):
     payment_types = multiselect_all("Payment method", opts["payment_types"], key="payment_types")
     review_scores = multiselect_all("Review score", opts["review_scores"], key="review_scores")
 
+    weight_volume_range = st.sidebar.slider(
+        "Product weight × volume (g·cm³)",
+        min_value=opts["min_weight_volume"], max_value=opts["max_weight_volume"],
+        value=(opts["min_weight_volume"], opts["max_weight_volume"]), key="weight_volume_range",
+    )
+
     return {
         "date_range": date_range,
         "statuses": statuses,
@@ -219,6 +236,7 @@ def render_sidebar(df):
         "seller_states": seller_states,
         "payment_types": payment_types,
         "review_scores": review_scores,
+        "weight_volume_range": weight_volume_range,
     }
 
 
@@ -231,6 +249,9 @@ def apply_filters(df, filters):
     if NO_SCORE_LABEL in selected_scores:
         score_mask |= df["review_score"].isna()
 
+    min_weight_volume, max_weight_volume = filters["weight_volume_range"]
+    weight_volume_mask = df["product_weight_volume"].between(min_weight_volume, max_weight_volume)
+
     mask = (
         (df["order_purchase_timestamp"].dt.date >= start_date)
         & (df["order_purchase_timestamp"].dt.date <= end_date)
@@ -240,6 +261,7 @@ def apply_filters(df, filters):
         & (df["seller_state"].isin(filters["seller_states"]))
         & (df["payment_type"].isin(filters["payment_types"]))
         & score_mask
+        & weight_volume_mask
     )
     return df.loc[mask].copy()
 
