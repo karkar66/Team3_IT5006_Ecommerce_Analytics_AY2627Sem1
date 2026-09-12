@@ -2,4 +2,4 @@
 
 IT5006 Group Project
 
-<a href="https://www.google.com/" target="_blank" rel="noopener noreferrer">View Dashboard</a>
+<a href="https://team3-it5006.streamlit.app/" target="_blank" rel="noopener noreferrer">View Dashboard</a>
