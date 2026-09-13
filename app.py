@@ -121,7 +121,10 @@ def load_data(data_dir):
                               "order_estimated_delivery_date"]],
             on="order_id", how="left",
         )
-        .merge(olist["customers"][["customer_id", "customer_state"]], on="customer_id", how="left")
+        .merge(
+            olist["customers"][["customer_id", "customer_unique_id", "customer_state"]],
+            on="customer_id", how="left",
+        )
         .merge(olist["sellers"][["seller_id", "seller_state"]], on="seller_id", how="left")
         .merge(dominant_payment, on="order_id", how="left")
         .merge(installments, on="order_id", how="left")
@@ -136,18 +139,7 @@ def load_data(data_dir):
     df["delivery_delay_days"] = (df["order_delivered_customer_date"] - df["order_estimated_delivery_date"]).dt.days
     df["is_on_time"] = df["order_delivered_customer_date"] <= df["order_estimated_delivery_date"]
 
-    # Data-quality note: products missing an English category translation.
-    missing_products = products[products["product_category_name_english"] == UNTRANSLATED_LABEL]
-    translation_quality = {
-        "total_products": len(products),
-        "missing_count": len(missing_products),
-        "missing_no_category": int(products["product_category_name"].isna().sum()),
-        "missing_breakdown": missing_products.loc[
-            missing_products["product_category_name"].notna(), "product_category_name"
-        ].value_counts(),
-    }
-
-    return df, translation_quality
+    return df
 
 
 # ---------------------------------------------------------------------------
@@ -201,7 +193,11 @@ def render_sidebar(df):
     opts = get_filter_options(df)
     st.sidebar.header("Filters")
 
-    st.sidebar.markdown(f"📅 **Data available:** {opts['min_date']} → {opts['max_date']}")
+    st.sidebar.markdown(
+        f"📅 **Data available:** {opts['min_date']} → {opts['max_date']}  \n"
+        "<small>Based on approved orders</small>",
+        unsafe_allow_html=True,
+    )
     start_date = st.sidebar.date_input(
         "Start date", value=opts["min_date"], min_value=opts["min_date"], max_value=opts["max_date"],
         format="YYYY-MM-DD", key="start_date",
@@ -455,7 +451,7 @@ def render_logistics_tab(df):
 # ---------------------------------------------------------------------------
 # Tab 3: Product Performance & Reviews
 # ---------------------------------------------------------------------------
-def render_products_tab(df, translation_quality):
+def render_products_tab(df):
     if df.empty:
         st.info("Adjust filters to see product performance.")
         return
@@ -505,21 +501,33 @@ def render_products_tab(df, translation_quality):
                   xaxis_title="Review Score", yaxis_title="Delay past estimate (days)", showlegend=False)
         st.plotly_chart(fig_scatter, use_container_width=True)
 
-    with st.expander(
-        f"Data Quality: {translation_quality['missing_count']} products missing an English category translation"
-    ):
-        st.write(
-            f"Out of {translation_quality['total_products']:,} products, "
-            f"{translation_quality['missing_count']:,} have no English category translation "
-            f"(shown as \"{UNTRANSLATED_LABEL}\" throughout this dashboard)."
-        )
-        st.write(f"- {translation_quality['missing_no_category']:,} products have no category name at all")
-        if not translation_quality["missing_breakdown"].empty:
-            st.write("- Products whose category name isn't in the translation table:")
-            st.dataframe(
-                translation_quality["missing_breakdown"].rename_axis("product_category_name").rename("count"),
-                use_container_width=True,
-            )
+    st.subheader("Customer Repeat Rate")
+    orders_per_customer = df.groupby("customer_unique_id")["order_id"].nunique()
+    total_customers = len(orders_per_customer)
+    if total_customers == 0:
+        st.info("No customers match the selected filters.")
+        return
+
+    repeat_customers = int((orders_per_customer > 1).sum())
+    c1, c2, c3 = st.columns(3)
+    c1.metric("Unique Customers", f"{total_customers:,}")
+    c2.metric("Repeat Customers", f"{repeat_customers:,}")
+    c3.metric("Repeat Rate", f"{repeat_customers / total_customers:.2%}")
+
+    distribution = orders_per_customer.value_counts().sort_index().reset_index()
+    distribution.columns = ["orders_placed", "customers"]
+    distribution["orders_placed"] = distribution["orders_placed"].astype(str)
+    fig_repeat = px.bar(distribution, x="orders_placed", y="customers", text="customers",
+                        color_discrete_sequence=[BLUE], log_y=True)
+    fig_repeat.update_traces(texttemplate="%{text:,}", textposition="outside",
+                             hovertemplate="Orders placed: %{x}<br>Customers: %{y:,}<extra></extra>")
+    style_fig(fig_repeat, title="Orders per Customer",
+              xaxis_title="Orders placed", yaxis_title="Customers (log scale)")
+    st.plotly_chart(fig_repeat, use_container_width=True)
+    st.caption(
+        "One-time buyers dominate, so the customer axis uses a log scale to keep the repeat tail visible. "
+        "Figures reflect the current filters — a customer's other orders may fall outside them."
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -529,7 +537,7 @@ def main():
     st.title("Team 3 IT5006 Dashboard")
     st.caption("SmartCommerce · Olist Brazilian e-commerce interactive analytics")
 
-    df, translation_quality = load_data(DATA_DIR)
+    df = load_data(DATA_DIR)
     filters = render_sidebar(df)
     filtered = apply_filters(df, filters)
 
@@ -546,7 +554,7 @@ def main():
     with tab2:
         render_logistics_tab(filtered)
     with tab3:
-        render_products_tab(filtered, translation_quality)
+        render_products_tab(filtered)
 
 
 if __name__ == "__main__":
