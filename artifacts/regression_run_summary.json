@@ -1,0 +1,345 @@
+{
+  "selected_model": "Boosting absolute (initial)",
+  "model_parameters": {
+    "alpha": 0.9,
+    "ccp_alpha": 0.0,
+    "criterion": "friedman_mse",
+    "init": null,
+    "learning_rate": 0.05,
+    "loss": "absolute_error",
+    "max_depth": 3,
+    "max_features": null,
+    "max_leaf_nodes": null,
+    "min_impurity_decrease": 0.0,
+    "min_samples_leaf": 20,
+    "min_samples_split": 2,
+    "min_weight_fraction_leaf": 0.0,
+    "n_estimators": 100,
+    "n_iter_no_change": null,
+    "random_state": 42,
+    "subsample": 1.0,
+    "tol": 0.0001,
+    "validation_fraction": 0.1,
+    "verbose": 0,
+    "warm_start": false
+  },
+  "features": [
+    "n_items",
+    "n_unique_products",
+    "n_product_categories",
+    "n_sellers",
+    "n_seller_states",
+    "total_freight",
+    "total_product_weight_g",
+    "total_physical_score",
+    "max_seller_buyer_distance_km",
+    "freight_ratio",
+    "purchase_month",
+    "purchase_day_of_week",
+    "purchase_hour",
+    "main_product_category",
+    "farthest_seller_state",
+    "is_weekend",
+    "is_interstate"
+  ],
+  "versions": {
+    "python": "3.9.6",
+    "scikit-learn": "1.6.1",
+    "numpy": "2.0.2",
+    "pandas": "2.3.3",
+    "joblib": "1.5.3"
+  },
+  "data_sha256": {
+    "olist_customers_dataset.csv": "983a422239e1712ded753b3bf9ecf47dc73f144d306029dcfa99e70a226883d2",
+    "olist_geolocation_dataset.csv": "b514f6fc991b9566aeba02aa5d67e2c3630f034b60a0e05aa0d082a3b66d88d6",
+    "olist_order_items_dataset.csv": "0bc4d068c4fe38cbb01bd90e8746e3c613fe7b4baef75fab7b0e329701c3e279",
+    "olist_order_payments_dataset.csv": "4f713964f2815dbbaa40b9488268c55aac3627bfce5aa96cf58d1f3616de3cc0",
+    "olist_order_reviews_dataset.csv": "012b61c7593e34f51fa614efdf802b9c7056ce6aae5307ddb93236e7cfc797d7",
+    "olist_orders_dataset.csv": "8df58ef3d2d7e9944010f7beecd9b75367f5588ec6e3c91cec19ae3345ef9ecf",
+    "olist_products_dataset.csv": "3e6569628a17fbc75fd206ee357b59e20364b9afa90f5b6cd5b4d624c58aa9cc",
+    "olist_sellers_dataset.csv": "1f643d2b950373b85735e7794b20986f528d7a000432e7c6f9bcbb44d0846a0e",
+    "product_category_name_translation.csv": "a81f0d1f27b27e7293f761bc79e3ce8f348ee39c4b3ed3e49bde38f478586278"
+  },
+  "results": {
+    "screening": [
+      {
+        "Model": "Boosting (absolute)",
+        "Family": "Tree",
+        "CV MAE": 5.5054507639,
+        "MAE std": 1.1254078077,
+        "CV RMSE": 8.7180677885,
+        "CV R2": 0.0982635166,
+        "CV fit seconds": 23.1227440834
+      },
+      {
+        "Model": "Boosting (Huber)",
+        "Family": "Tree",
+        "CV MAE": 5.5783502145,
+        "MAE std": 0.9640497908,
+        "CV RMSE": 8.6255293253,
+        "CV R2": 0.1148902265,
+        "CV fit seconds": 24.1449885368
+      },
+      {
+        "Model": "Random Forest",
+        "Family": "Tree",
+        "CV MAE": 5.745134401,
+        "MAE std": 0.7069540279,
+        "CV RMSE": 8.6183524199,
+        "CV R2": 0.1080104812,
+        "CV fit seconds": 26.4415242672
+      },
+      {
+        "Model": "Boosting (squared)",
+        "Family": "Tree",
+        "CV MAE": 5.7603520922,
+        "MAE std": 0.7415642724,
+        "CV RMSE": 8.6235184139,
+        "CV R2": 0.1064913466,
+        "CV fit seconds": 21.9493851662
+      },
+      {
+        "Model": "Lasso",
+        "Family": "Linear",
+        "CV MAE": 5.821603732,
+        "MAE std": 0.9754941154,
+        "CV RMSE": 8.6572350519,
+        "CV R2": 0.1069323328,
+        "CV fit seconds": 0.914993763
+      },
+      {
+        "Model": "Decision Tree",
+        "Family": "Tree",
+        "CV MAE": 5.8496310179,
+        "MAE std": 0.6150892194,
+        "CV RMSE": 8.7343504939,
+        "CV R2": 0.0807926263,
+        "CV fit seconds": 1.6126968861
+      },
+      {
+        "Model": "Median benchmark",
+        "Family": "Benchmark",
+        "CV MAE": 6.4857619599,
+        "MAE std": 1.2029980983,
+        "CV RMSE": 9.6616404281,
+        "CV R2": -0.1117505657,
+        "CV fit seconds": 0.0123450756
+      },
+      {
+        "Model": "Mean benchmark",
+        "Family": "Benchmark",
+        "CV MAE": 6.4965986076,
+        "MAE std": 1.0157791658,
+        "CV RMSE": 9.3329074082,
+        "CV R2": -0.0412906528,
+        "CV fit seconds": 0.0137898922
+      },
+      {
+        "Model": "Ridge",
+        "Family": "Linear",
+        "CV MAE": 7.0389401719,
+        "MAE std": 1.3622271666,
+        "CV RMSE": 9.8919124706,
+        "CV R2": -0.271817217,
+        "CV fit seconds": 0.8219797611
+      },
+      {
+        "Model": "Linear Regression",
+        "Family": "Linear",
+        "CV MAE": 7.8975033045,
+        "MAE std": 2.1013468367,
+        "CV RMSE": 11.1760278885,
+        "CV R2": -0.7779107643,
+        "CV fit seconds": 1.0532305241
+      }
+    ],
+    "tuning": [
+      {
+        "Model": "Boosting (absolute)",
+        "Initial CV MAE": 5.5054507639,
+        "Tuned CV MAE": 5.4720119294,
+        "MAE improvement": 0.0334388345,
+        "Best parameters": {
+          "model__n_estimators": 100,
+          "model__min_samples_leaf": 20,
+          "model__max_depth": 2,
+          "model__learning_rate": 0.05
+        }
+      },
+      {
+        "Model": "Lasso",
+        "Initial CV MAE": 5.821603732,
+        "Tuned CV MAE": 5.4924804909,
+        "MAE improvement": 0.3291232411,
+        "Best parameters": {
+          "model__alpha": 0.088586679
+        }
+      }
+    ],
+    "validation": [
+      {
+        "Model": "Boosting (absolute) (initial)",
+        "Train MAE": 5.0672170398,
+        "MAE": 4.3354383877,
+        "RMSE": 6.4423057781,
+        "R2": 0.2538446621,
+        "Prediction ms/order": 0.0034153983
+      },
+      {
+        "Model": "Boosting (absolute) (tuned)",
+        "Train MAE": 5.1572857433,
+        "MAE": 4.3790496126,
+        "RMSE": 6.4365477969,
+        "R2": 0.2551778582,
+        "Prediction ms/order": 0.0029595303
+      },
+      {
+        "Model": "Lasso (tuned)",
+        "Train MAE": 5.4588285817,
+        "MAE": 4.9791369068,
+        "RMSE": 6.7068659331,
+        "R2": 0.1913030006,
+        "Prediction ms/order": 0.0012931296
+      },
+      {
+        "Model": "Median benchmark (initial)",
+        "Train MAE": 6.3322770889,
+        "MAE": 5.5332665065,
+        "RMSE": 7.5055081218,
+        "R2": -0.0127605594,
+        "Prediction ms/order": 7.4705e-06
+      },
+      {
+        "Model": "Lasso (initial)",
+        "Train MAE": 5.912556809,
+        "MAE": 5.7772027808,
+        "RMSE": 7.2611666787,
+        "R2": 0.052106831,
+        "Prediction ms/order": 0.0013520923
+      },
+      {
+        "Model": "Mean benchmark (initial)",
+        "Train MAE": 6.5905956295,
+        "MAE": 6.4628182003,
+        "RMSE": 8.0609253318,
+        "R2": -0.1681977841,
+        "Prediction ms/order": 6.186e-06
+      },
+      {
+        "Model": "Olist checkout estimate",
+        "Train MAE": null,
+        "MAE": 15.5310679604,
+        "RMSE": 17.9360017415,
+        "R2": -4.7835947701,
+        "Prediction ms/order": null
+      }
+    ],
+    "stability": [
+      {
+        "Model": "Boosting absolute (initial)",
+        "seed_runs": 5,
+        "cv_mae": 5.5020047628,
+        "cv_seed_sd": 0.0031464031,
+        "validation_mae": 4.3365615395,
+        "validation_seed_sd": 0.0014479925,
+        "temporal_fold_sd": 1.128252025
+      },
+      {
+        "Model": "Lasso (tuned)",
+        "seed_runs": 1,
+        "cv_mae": 5.4924804909,
+        "cv_seed_sd": null,
+        "validation_mae": 4.9791369068,
+        "validation_seed_sd": null,
+        "temporal_fold_sd": 0.8616996281
+      }
+    ],
+    "temporal_folds": [
+      {
+        "Fold": 1,
+        "Boosting absolute (initial)": 4.0010379526,
+        "Lasso (tuned)": 4.5646526459
+      },
+      {
+        "Fold": 2,
+        "Boosting absolute (initial)": 4.5652148785,
+        "Lasso (tuned)": 4.5061398141
+      },
+      {
+        "Fold": 3,
+        "Boosting absolute (initial)": 6.9504632806,
+        "Lasso (tuned)": 6.6455505867
+      },
+      {
+        "Fold": 4,
+        "Boosting absolute (initial)": 6.565380054,
+        "Lasso (tuned)": 6.2333717301
+      },
+      {
+        "Fold": 5,
+        "Boosting absolute (initial)": 5.4279276481,
+        "Lasso (tuned)": 5.5126876778
+      }
+    ],
+    "month_ablation": [
+      {
+        "Model": "Boosting absolute (initial)",
+        "Features": "With month",
+        "CV MAE": 5.5054507639,
+        "Fold SD": 1.1254078077,
+        "Validation MAE": 4.3354383877,
+        "Validation RMSE": 6.4423057781,
+        "Validation R2": 0.2538446621,
+        "Change in CV MAE": 0.0,
+        "Change in Validation MAE": 0.0
+      },
+      {
+        "Model": "Boosting absolute (initial)",
+        "Features": "Without month",
+        "CV MAE": 5.3334601453,
+        "Fold SD": 1.1496838605,
+        "Validation MAE": 4.4121572866,
+        "Validation RMSE": 6.3814955608,
+        "Validation R2": 0.2678644008,
+        "Change in CV MAE": -0.1719906185,
+        "Change in Validation MAE": 0.0767188989
+      },
+      {
+        "Model": "Lasso (tuned)",
+        "Features": "With month",
+        "CV MAE": 5.4924804909,
+        "Fold SD": 0.8616996281,
+        "Validation MAE": 4.9791369068,
+        "Validation RMSE": 6.7068659331,
+        "Validation R2": 0.1913030006,
+        "Change in CV MAE": 0.0,
+        "Change in Validation MAE": 0.0
+      },
+      {
+        "Model": "Lasso (tuned)",
+        "Features": "Without month",
+        "CV MAE": 5.4473928125,
+        "Fold SD": 0.9110559314,
+        "Validation MAE": 5.4154734308,
+        "Validation RMSE": 6.9930807713,
+        "Validation R2": 0.120808116,
+        "Change in CV MAE": -0.0450876784,
+        "Change in Validation MAE": 0.436336524
+      }
+    ],
+    "final_test": [
+      {
+        "Model": "Boosting absolute (initial)",
+        "MAE": 3.9154472014,
+        "RMSE": 5.1576858496,
+        "R2": 0.0779945848
+      },
+      {
+        "Model": "Olist checkout estimate",
+        "MAE": 9.7224610875,
+        "RMSE": 12.0912009392,
+        "R2": -4.0671361878
+      }
+    ]
+  }
+}
