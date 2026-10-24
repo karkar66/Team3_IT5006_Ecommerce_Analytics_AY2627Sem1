@@ -1,15 +1,32 @@
+import json
 import os
 import warnings
+from datetime import datetime
 warnings.filterwarnings("ignore")
 
+import numpy as np
 import pandas as pd
 import plotly.express as px
+import requests
 import streamlit as st
 
 st.set_page_config(page_title="Team 3 IT5006 Dashboard", layout="wide")
 
 DATA_DIR = "Olist_data"
 UNTRANSLATED_LABEL = "untranslated / missing"
+
+API_BASE_URL = "https://team3-it5006-ecommerce-analytics.onrender.com"
+PREDICT_URL = f"{API_BASE_URL}/predict"
+RUN_SUMMARY_PATH = os.path.join("artifacts", "regression_run_summary.json")
+# Order counts per temporal split, from the split table in cell 12 of
+# notebooks/phase2 regression edits.ipynb (not recorded in the run summary).
+SPLIT_SIZES = {"Train": 68_318, "Validation": 12_845, "Test": 12_507}
+CATEGORICAL_FEATURES = {
+    "purchase_month", "purchase_day_of_week", "purchase_hour", "main_product_category",
+    "farthest_seller_state", "is_weekend", "is_interstate",
+}
+# Seller states absent from training: the API rejects them as unseen categories.
+UNSEEN_SELLER_STATES = {"AC"}
 
 # ---------------------------------------------------------------------------
 # Design tokens (validated categorical + sequential palette)
@@ -140,6 +157,30 @@ def load_data(data_dir):
     df["is_on_time"] = df["order_delivered_customer_date"] <= df["order_estimated_delivery_date"]
 
     return df
+
+
+@st.cache_data
+def load_zip_coordinates(data_dir):
+    """Median lat/lng per 5-digit zip prefix, as in the regression notebook's distance feature."""
+    geo = pd.read_csv(
+        os.path.join(data_dir, "olist_geolocation_dataset.csv"),
+        usecols=["geolocation_zip_code_prefix", "geolocation_lat", "geolocation_lng"],
+        dtype={"geolocation_zip_code_prefix": "string"},
+    )
+    geo["geolocation_zip_code_prefix"] = geo["geolocation_zip_code_prefix"].str.zfill(5)
+    return geo.groupby("geolocation_zip_code_prefix")[["geolocation_lat", "geolocation_lng"]].median()
+
+
+def haversine_km(lat1, lon1, lat2, lon2):
+    lat1, lon1, lat2, lon2 = map(np.radians, (lat1, lon1, lat2, lon2))
+    a = np.sin((lat2 - lat1) / 2) ** 2 + np.cos(lat1) * np.cos(lat2) * np.sin((lon2 - lon1) / 2) ** 2
+    return 6371 * 2 * np.arcsin(np.sqrt(a))
+
+
+@st.cache_data
+def load_run_summary(path):
+    with open(path) as f:
+        return json.load(f)
 
 
 # ---------------------------------------------------------------------------
@@ -531,6 +572,325 @@ def render_products_tab(df):
 
 
 # ---------------------------------------------------------------------------
+# Tab 4: Delivery-time prediction (calls the deployed FastAPI /predict)
+# ---------------------------------------------------------------------------
+def zip_distance_km(customer_zip, seller_zip):
+    """Haversine km between two zip prefixes, or None if either is unknown."""
+    coords = load_zip_coordinates(DATA_DIR)
+    customer_zip, seller_zip = customer_zip.strip().zfill(5), seller_zip.strip().zfill(5)
+    if customer_zip not in coords.index or seller_zip not in coords.index:
+        return None
+    (lat1, lon1), (lat2, lon2) = coords.loc[customer_zip], coords.loc[seller_zip]
+    return round(float(haversine_km(lat1, lon1, lat2, lon2)), 2)
+
+
+# Real delivered orders from the reserved test period (Jul-Aug 2018, unseen in training),
+# aggregated with the notebook's feature builder. Keys match the prediction form's widget keys.
+SAMPLE_ORDERS = [
+    {"label": "Small: 1 health & beauty item", "order_id": "038f8b45fafa1130d2557e5b8dfd5d71",
+     "actual_days": 2.25, "values": {
+         "pred_purchased_at": "2018-07-22 13:00:04", "pred_n_items": 1, "pred_n_unique_products": 1,
+         "pred_n_product_categories": 1, "pred_n_sellers": 1, "pred_n_seller_states": 1,
+         "pred_main_product_category": "health_beauty", "pred_total_price": 19.99, "pred_total_freight": 7.40,
+         "pred_total_product_weight_g": 50.0, "pred_total_physical_score": 225000.0,
+         "pred_customer_zip": "05466", "pred_seller_zip": "13481",
+         "pred_farthest_seller_state": "SP", "pred_is_interstate": "False"}},
+    {"label": "Heavy single: 1 musical instrument (30 kg)", "order_id": "029c545413b10a6bd7540401f6eef0a3",
+     "actual_days": 9.96, "values": {
+         "pred_purchased_at": "2018-07-10 17:16:33", "pred_n_items": 1, "pred_n_unique_products": 1,
+         "pred_n_product_categories": 1, "pred_n_sellers": 1, "pred_n_seller_states": 1,
+         "pred_main_product_category": "musical_instruments", "pred_total_price": 1350.00,
+         "pred_total_freight": 294.76, "pred_total_product_weight_g": 30000.0,
+         "pred_total_physical_score": 6480000000.0, "pred_customer_zip": "71680", "pred_seller_zip": "18060",
+         "pred_farthest_seller_state": "SP", "pred_is_interstate": "True"}},
+    {"label": "Multiple: 3 identical computer accessories", "order_id": "00a57dfbb049fbaae10763e2cf15f797",
+     "actual_days": 10.34, "values": {
+         "pred_purchased_at": "2018-07-20 11:09:30", "pred_n_items": 3, "pred_n_unique_products": 1,
+         "pred_n_product_categories": 1, "pred_n_sellers": 1, "pred_n_seller_states": 1,
+         "pred_main_product_category": "computers_accessories", "pred_total_price": 269.70,
+         "pred_total_freight": 67.68, "pred_total_product_weight_g": 1551.0,
+         "pred_total_physical_score": 4879446.0, "pred_customer_zip": "79002", "pred_seller_zip": "87114",
+         "pred_farthest_seller_state": "PR", "pred_is_interstate": "True"}},
+    {"label": "Mixed: 4 items from 2 sellers in 2 states", "order_id": "0c0aeabd6ae9d7a303af615334a220d0",
+     "actual_days": 7.18, "values": {
+         "pred_purchased_at": "2018-08-20 14:45:48", "pred_n_items": 4, "pred_n_unique_products": 2,
+         "pred_n_product_categories": 2, "pred_n_sellers": 2, "pred_n_seller_states": 2,
+         "pred_main_product_category": "housewares", "pred_total_price": 264.84, "pred_total_freight": 77.53,
+         "pred_total_product_weight_g": 2300.0, "pred_total_physical_score": 21569800.0,
+         "pred_customer_zip": "01456", "pred_seller_zip": "95020",
+         "pred_farthest_seller_state": "RS", "pred_is_interstate": "True"}},
+    {"label": "Big: 6 phones shipped 2,300 km", "order_id": "03aba68b07658f28f29612641f08d4ba",
+     "actual_days": 13.05, "values": {
+         "pred_purchased_at": "2018-08-08 14:27:15", "pred_n_items": 6, "pred_n_unique_products": 1,
+         "pred_n_product_categories": 1, "pred_n_sellers": 1, "pred_n_seller_states": 1,
+         "pred_main_product_category": "telephony", "pred_total_price": 1020.00, "pred_total_freight": 182.64,
+         "pred_total_product_weight_g": 4200.0, "pred_total_physical_score": 42336000.0,
+         "pred_customer_zip": "91170", "pred_seller_zip": "42738",
+         "pred_farthest_seller_state": "BA", "pred_is_interstate": "True"}},
+]
+
+
+def load_sample_into_form(sample):
+    """Button callback: runs before the rerun, so the form widgets pick up these values."""
+    values = dict(sample["values"])
+    purchased_at = pd.Timestamp(values.pop("pred_purchased_at"))
+    st.session_state["pred_purchase_date"] = purchased_at.date()
+    st.session_state["pred_purchase_time"] = purchased_at.time().replace(second=0)
+    st.session_state.update(values)
+    st.session_state["pred_loaded_sample"] = sample["order_id"]
+
+
+def render_sample_orders():
+    st.subheader("Sample Orders")
+    st.caption(
+        "Real delivered orders from the test period (Jul–Aug 2018), which the model never saw in training. "
+        "Load one into the form above and press Predict to compare with the actual delivery time."
+    )
+    table = pd.DataFrame([
+        {"Sample": s["label"], **{k.removeprefix("pred_"): v for k, v in s["values"].items()},
+         "actual_delivery_days": s["actual_days"]}
+        for s in SAMPLE_ORDERS
+    ])
+    st.dataframe(table, hide_index=True, use_container_width=True)
+    cols = st.columns(len(SAMPLE_ORDERS))
+    for i, (col, sample) in enumerate(zip(cols, SAMPLE_ORDERS), start=1):
+        col.button(f"Load sample {i}", key=f"load_sample_{i}", on_click=load_sample_into_form,
+                   args=(sample,), use_container_width=True)
+
+
+def render_prediction_tab():
+    olist = load_olist_data(DATA_DIR)
+    categories = sorted(olist["category_translation"]["product_category_name_english"].dropna().unique())
+    seller_states = sorted(set(olist["sellers"]["seller_state"].dropna()) - UNSEEN_SELLER_STATES)
+
+    # Defaults go through session state (not `value=`) so sample buttons can overwrite them.
+    now = datetime.now()
+    defaults = {
+        "pred_purchase_date": now.date(), "pred_purchase_time": now.time().replace(second=0, microsecond=0),
+        "pred_n_items": 0, "pred_n_unique_products": 0, "pred_n_product_categories": 0,
+        "pred_n_sellers": 0, "pred_n_seller_states": 0, "pred_main_product_category": categories[0],
+        "pred_total_price": 0.0, "pred_total_freight": 0.0, "pred_total_product_weight_g": 0.0,
+        "pred_total_physical_score": 0.0, "pred_customer_zip": "", "pred_seller_zip": "",
+        "pred_farthest_seller_state": "SP" if "SP" in seller_states else seller_states[0],
+        "pred_is_interstate": "True",
+    }
+    for key, value in defaults.items():
+        st.session_state.setdefault(key, value)
+
+    st.subheader("Predict Delivery Days")
+    st.caption("Estimate purchase-to-delivery days for a new order at checkout.")
+    st.markdown(
+        f"API: [GET /health]({API_BASE_URL}/health) · [GET /docs (Swagger UI)]({API_BASE_URL}/docs#/)"
+    )
+
+    loaded = next((s for s in SAMPLE_ORDERS if s["order_id"] == st.session_state.get("pred_loaded_sample")), None)
+    if loaded:
+        st.info(f"Loaded sample: {loaded['label']} — actual delivery took {loaded['actual_days']:.1f} days.")
+
+    with st.form("prediction_form"):
+        st.markdown("**Purchase**")
+        c1, c2 = st.columns(2)
+        purchase_date = c1.date_input("Purchase date", format="YYYY-MM-DD", key="pred_purchase_date")
+        purchase_time = c2.time_input("Purchase time", step=60, key="pred_purchase_time")
+
+        st.markdown("**Basket**")
+        c1, c2, c3 = st.columns(3)
+        n_items = c1.number_input("No. of items", min_value=0, step=1, key="pred_n_items")
+        n_unique_products = c2.number_input("No. of unique items", min_value=0, step=1, key="pred_n_unique_products")
+        n_product_categories = c3.number_input("No. of product categories", min_value=0, step=1,
+                                               key="pred_n_product_categories")
+        c1, c2 = st.columns(2)
+        n_sellers = c1.number_input("No. of sellers", min_value=0, step=1, key="pred_n_sellers")
+        n_seller_states = c2.number_input("No. of seller states", min_value=0, step=1, key="pred_n_seller_states")
+        main_product_category = st.selectbox(
+            "Main product category", categories, key="pred_main_product_category",
+            help="Most common category among the order's items; ties go to the alphabetically first.",
+        )
+
+        st.markdown("**Price & physical size**")
+        c1, c2 = st.columns(2)
+        total_price = c1.number_input("Total price (R$)", min_value=0.0, step=1.0, format="%.2f",
+                                      key="pred_total_price")
+        total_freight = c2.number_input("Total freight (R$)", min_value=0.0, step=1.0, format="%.2f",
+                                        key="pred_total_freight")
+        c1, c2 = st.columns(2)
+        total_product_weight_g = c1.number_input("Total product weight (g)", min_value=0.0, step=100.0,
+                                                 key="pred_total_product_weight_g")
+        total_physical_score = c2.number_input(
+            "Total physical score", min_value=0.0, step=1000.0, key="pred_total_physical_score",
+            help="Sum over items of weight (g) × volume (cm³).",
+        )
+
+        st.markdown("**Shipping**")
+        c1, c2 = st.columns(2)
+        customer_zip = c1.text_input("Customer zip prefix (5 digits)", max_chars=5, placeholder="e.g. 01310",
+                                     key="pred_customer_zip")
+        seller_zip = c2.text_input("Farthest seller zip prefix (5 digits)", max_chars=5, placeholder="e.g. 13023",
+                                   key="pred_seller_zip")
+        c1, c2 = st.columns(2)
+        farthest_seller_state = c1.selectbox("Farthest seller state", seller_states,
+                                             key="pred_farthest_seller_state")
+        is_interstate = c2.selectbox("Interstate order?", ["True", "False"], key="pred_is_interstate")
+
+        submitted = st.form_submit_button("Predict Delivery Days", type="primary")
+
+    if submitted:
+        submit_prediction(
+            purchase_date, purchase_time, n_items, n_unique_products, n_product_categories, n_sellers,
+            n_seller_states, main_product_category, total_price, total_freight, total_product_weight_g,
+            total_physical_score, customer_zip, seller_zip, farthest_seller_state, is_interstate, loaded,
+        )
+
+    st.divider()
+    render_sample_orders()
+
+
+def submit_prediction(purchase_date, purchase_time, n_items, n_unique_products, n_product_categories, n_sellers,
+                      n_seller_states, main_product_category, total_price, total_freight, total_product_weight_g,
+                      total_physical_score, customer_zip, seller_zip, farthest_seller_state, is_interstate,
+                      loaded_sample):
+
+    counts = {
+        "No. of items": n_items, "No. of unique items": n_unique_products,
+        "No. of product categories": n_product_categories, "No. of sellers": n_sellers,
+        "No. of seller states": n_seller_states,
+    }
+    missing = [label for label, value in counts.items() if value < 1]
+    if missing:
+        st.error(f"These must be at least 1: {', '.join(missing)}.")
+        return
+
+    distance_km = None
+    if customer_zip.strip() and seller_zip.strip():
+        distance_km = zip_distance_km(customer_zip, seller_zip)
+        if distance_km is None:
+            st.warning("Zip prefix not found in the geolocation data; the model will use the typical distance.")
+    else:
+        st.info("No zip prefixes given; the model will use the typical seller–buyer distance.")
+
+    purchased_at = datetime.combine(purchase_date, purchase_time)
+    payload = {
+        "n_items": int(n_items),
+        "n_unique_products": int(n_unique_products),
+        "n_product_categories": int(n_product_categories),
+        "n_sellers": int(n_sellers),
+        "n_seller_states": int(n_seller_states),
+        "total_freight": float(total_freight),
+        "total_product_weight_g": float(total_product_weight_g),
+        "total_physical_score": float(total_physical_score),
+        "max_seller_buyer_distance_km": distance_km,
+        # Same +1 smoothing as the notebook, so zero-price orders don't divide by zero.
+        "freight_ratio": float(total_freight) / (float(total_price) + 1),
+        "purchase_month": purchased_at.month,
+        "purchase_day_of_week": purchased_at.strftime("%A"),
+        "purchase_hour": purchased_at.hour,
+        "main_product_category": main_product_category,
+        "farthest_seller_state": farthest_seller_state,
+        "is_weekend": str(purchased_at.weekday() >= 5),
+        "is_interstate": is_interstate,
+    }
+
+    # The free Render instance sleeps when idle, so the first call can take ~30-60s.
+    with st.spinner("Calling the prediction API (may take up to a minute if it is waking up)..."):
+        try:
+            response = requests.post(PREDICT_URL, json=payload, timeout=90)
+        except requests.RequestException as exc:
+            st.error(f"Could not reach the prediction API: {exc}")
+            return
+
+    if response.status_code != 200:
+        try:
+            detail = response.json().get("detail", response.text)
+        except ValueError:
+            detail = response.text
+        st.error(f"API returned {response.status_code}.")
+        st.json(detail)
+        return
+
+    result = response.json()
+    days = result["predicted_delivery_days"]
+    c1, c2, c3 = st.columns(3)
+    c1.metric("Predicted delivery", f"{days:.1f} days")
+    c2.metric("Expected arrival", (purchased_at + pd.Timedelta(days=days)).strftime("%Y-%m-%d"))
+    c3.metric("Seller–buyer distance", f"{distance_km:,.0f} km" if distance_km is not None else "typical")
+    if loaded_sample and all(st.session_state.get(k) == v for k, v in loaded_sample["values"].items()
+                             if k != "pred_purchased_at"):
+        st.caption(f"Actual delivery for this sample: {loaded_sample['actual_days']:.1f} days "
+                   f"(prediction off by {days - loaded_sample['actual_days']:+.1f} days).")
+    st.caption(f"Model: {result['model_name']} · trained on purchases before {result['training_purchase_cutoff']}")
+    with st.expander("Request payload sent to the API"):
+        st.json(payload)
+
+
+# ---------------------------------------------------------------------------
+# Tab 5: Model statistics (from artifacts/regression_run_summary.json)
+# ---------------------------------------------------------------------------
+def render_model_stats_tab():
+    try:
+        summary = load_run_summary(RUN_SUMMARY_PATH)
+    except FileNotFoundError:
+        st.error(f"Run summary not found at {RUN_SUMMARY_PATH}.")
+        return
+    results = summary["results"]
+
+    st.subheader("Data Splits")
+    st.caption("Temporal split by purchase date: the model is trained on the past and evaluated on later orders.")
+    c1, c2, c3, c4 = st.columns(4)
+    c1.metric("Train orders", f"{SPLIT_SIZES['Train']:,}")
+    c2.metric("Validation orders", f"{SPLIT_SIZES['Validation']:,}")
+    c3.metric("Test orders", f"{SPLIT_SIZES['Test']:,}")
+    c4.metric("Total", f"{sum(SPLIT_SIZES.values()):,}")
+
+    st.subheader("Model")
+    params = summary["model_parameters"]
+    c1, c2, c3, c4 = st.columns(4)
+    c1.metric("Selected model", summary["selected_model"])
+    c2.metric("Loss", params["loss"])
+    c3.metric("Trees × depth", f"{params['n_estimators']} × {params['max_depth']}")
+    c4.metric("Learning rate", params["learning_rate"])
+    with st.expander("All model parameters"):
+        st.dataframe(
+            pd.DataFrame({"parameter": list(params), "value": [str(v) for v in params.values()]}),
+            hide_index=True, use_container_width=True,
+        )
+    with st.expander("Training library versions"):
+        st.json(summary["versions"])
+
+    st.subheader("Features")
+    features = summary["features"]
+    categorical = [f for f in features if f in CATEGORICAL_FEATURES]
+    numeric = [f for f in features if f not in CATEGORICAL_FEATURES]
+    c1, c2, c3 = st.columns(3)
+    c1.metric("Total features", len(features))
+    c2.metric("Numeric", len(numeric))
+    c3.metric("Categorical", len(categorical))
+    c1, c2 = st.columns(2)
+    c1.markdown("**Numeric** (median-imputed)\n" + "\n".join(f"- `{f}`" for f in numeric))
+    c2.markdown("**Categorical** (one-hot encoded)\n" + "\n".join(f"- `{f}`" for f in categorical))
+
+    st.subheader("Model Metrics")
+    st.markdown("**Final test set** (held-out, most recent orders)")
+    test = {row["Model"]: row for row in results["final_test"]}
+    model_row = test[summary["selected_model"]]
+    olist_row = test.get("Olist checkout estimate")
+    c1, c2, c3 = st.columns(3)
+    for col, metric, unit in [(c1, "MAE", " days"), (c2, "RMSE", " days"), (c3, "R2", "")]:
+        delta = None
+        if olist_row is not None:
+            delta = f"{model_row[metric] - olist_row[metric]:+.2f} vs. Olist estimate"
+        # Lower is better for MAE/RMSE, higher for R2.
+        col.metric(f"Test {metric.replace('R2', 'R²')}", f"{model_row[metric]:.2f}{unit}", delta=delta,
+                   delta_color="normal" if metric == "R2" else "inverse")
+
+    st.markdown("**Validation set** (model selection)")
+    validation = pd.DataFrame(results["validation"]).round(3)
+    st.dataframe(validation, hide_index=True, use_container_width=True)
+
+    with st.expander("Cross-validation screening (all candidate models)"):
+        st.dataframe(pd.DataFrame(results["screening"]).round(3), hide_index=True, use_container_width=True)
+
+
+# ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 def main():
@@ -544,10 +904,12 @@ def main():
     render_kpis(filtered)
     st.divider()
 
-    tab1, tab2, tab3 = st.tabs([
+    tab1, tab2, tab3, tab4, tab5 = st.tabs([
         "Sales & Revenue Trends",
         "Logistics & Regional Insights",
         "Product Performance & Reviews",
+        "Prediction",
+        "Model Stats",
     ])
     with tab1:
         render_sales_tab(filtered)
@@ -555,6 +917,10 @@ def main():
         render_logistics_tab(filtered)
     with tab3:
         render_products_tab(filtered)
+    with tab4:
+        render_prediction_tab()
+    with tab5:
+        render_model_stats_tab()
 
 
 if __name__ == "__main__":
