@@ -1,5 +1,6 @@
 {
-  "selected_model": "Boosting absolute (initial)",
+  "selected_model": "Boosting (absolute) (tuned)",
+  "evaluation_design": "Retrospective purchase-time cohorts with eventual delivery labels",
   "model_parameters": {
     "alpha": 0.9,
     "ccp_alpha": 0.0,
@@ -7,14 +8,14 @@
     "init": null,
     "learning_rate": 0.05,
     "loss": "absolute_error",
-    "max_depth": 3,
+    "max_depth": 2,
     "max_features": null,
     "max_leaf_nodes": null,
     "min_impurity_decrease": 0.0,
     "min_samples_leaf": 20,
     "min_samples_split": 2,
     "min_weight_fraction_leaf": 0.0,
-    "n_estimators": 100,
+    "n_estimators": 200,
     "n_iter_no_change": null,
     "random_state": 42,
     "subsample": 1.0,
@@ -61,106 +62,176 @@
     "product_category_name_translation.csv": "a81f0d1f27b27e7293f761bc79e3ce8f348ee39c4b3ed3e49bde38f478586278"
   },
   "results": {
+    "splits": [
+      {
+        "Split": "Train",
+        "Orders": 71118,
+        "Mean delivery days": 13.693321887,
+        "First purchase used": 1473941798000,
+        "Last purchase used": 1525132046000
+      },
+      {
+        "Split": "Validation",
+        "Orders": 12845,
+        "Mean delivery days": 10.3845300746,
+        "First purchase used": 1525132931000,
+        "Last purchase used": 1530403189000
+      },
+      {
+        "Split": "Test (reused holdout)",
+        "Orders": 12507,
+        "Mean delivery days": 8.3361516495,
+        "First purchase used": 1530404707000,
+        "Last purchase used": 1535554837000
+      }
+    ],
+    "cv_folds": [
+      {
+        "Fold": 1,
+        "Train orders": 11853,
+        "Validation orders": 11853,
+        "Train start": 1473941798000,
+        "Train end": 1496864656000,
+        "Validation start": 1496865250000,
+        "Validation end": 1505183071000
+      },
+      {
+        "Fold": 2,
+        "Train orders": 23706,
+        "Validation orders": 11853,
+        "Train start": 1473941798000,
+        "Train end": 1505183071000,
+        "Validation start": 1505197328000,
+        "Validation end": 1511546075000
+      },
+      {
+        "Fold": 3,
+        "Train orders": 35559,
+        "Validation orders": 11853,
+        "Train start": 1473941798000,
+        "Train end": 1511546075000,
+        "Validation start": 1511546114000,
+        "Validation end": 1516183033000
+      },
+      {
+        "Fold": 4,
+        "Train orders": 47412,
+        "Validation orders": 11853,
+        "Train start": 1473941798000,
+        "Train end": 1516183033000,
+        "Validation start": 1516183198000,
+        "Validation end": 1520548209000
+      },
+      {
+        "Fold": 5,
+        "Train orders": 59265,
+        "Validation orders": 11853,
+        "Train start": 1473941798000,
+        "Train end": 1520548209000,
+        "Validation start": 1520548733000,
+        "Validation end": 1525132046000
+      }
+    ],
     "screening": [
       {
         "Model": "Boosting (absolute)",
         "Family": "Tree",
-        "CV MAE": 5.5054507639,
-        "MAE std": 1.1254078077,
-        "CV RMSE": 8.7180677885,
-        "CV R2": 0.0982635166,
-        "CV fit seconds": 23.1227440834
+        "CV MAE": 5.604267257,
+        "MAE std": 1.2104073261,
+        "CV RMSE": 9.1760494228,
+        "CV R2": 0.1128364712,
+        "CV fit seconds": 46.3478417397
       },
       {
         "Model": "Boosting (Huber)",
         "Family": "Tree",
-        "CV MAE": 5.5783502145,
-        "MAE std": 0.9640497908,
-        "CV RMSE": 8.6255293253,
-        "CV R2": 0.1148902265,
-        "CV fit seconds": 24.1449885368
+        "CV MAE": 5.6657142128,
+        "MAE std": 1.0390622576,
+        "CV RMSE": 9.0299345127,
+        "CV R2": 0.1379852185,
+        "CV fit seconds": 46.4071891308
       },
       {
         "Model": "Random Forest",
         "Family": "Tree",
-        "CV MAE": 5.745134401,
-        "MAE std": 0.7069540279,
-        "CV RMSE": 8.6183524199,
-        "CV R2": 0.1080104812,
-        "CV fit seconds": 26.4415242672
+        "CV MAE": 5.8090869014,
+        "MAE std": 0.8587151676,
+        "CV RMSE": 8.9142752423,
+        "CV R2": 0.1521947285,
+        "CV fit seconds": 60.9376749992
       },
       {
         "Model": "Boosting (squared)",
         "Family": "Tree",
-        "CV MAE": 5.7603520922,
-        "MAE std": 0.7415642724,
-        "CV RMSE": 8.6235184139,
-        "CV R2": 0.1064913466,
-        "CV fit seconds": 21.9493851662
-      },
-      {
-        "Model": "Lasso",
-        "Family": "Linear",
-        "CV MAE": 5.821603732,
-        "MAE std": 0.9754941154,
-        "CV RMSE": 8.6572350519,
-        "CV R2": 0.1069323328,
-        "CV fit seconds": 0.914993763
+        "CV MAE": 5.8394784222,
+        "MAE std": 0.8086296157,
+        "CV RMSE": 8.9561801668,
+        "CV R2": 0.1433850823,
+        "CV fit seconds": 41.3624927998
       },
       {
         "Model": "Decision Tree",
         "Family": "Tree",
-        "CV MAE": 5.8496310179,
-        "MAE std": 0.6150892194,
-        "CV RMSE": 8.7343504939,
-        "CV R2": 0.0807926263,
-        "CV fit seconds": 1.6126968861
+        "CV MAE": 5.9388081962,
+        "MAE std": 0.7861240925,
+        "CV RMSE": 9.0763231504,
+        "CV R2": 0.117720528,
+        "CV fit seconds": 3.0042021275
+      },
+      {
+        "Model": "Lasso",
+        "Family": "Linear",
+        "CV MAE": 6.0439736084,
+        "MAE std": 1.0059206198,
+        "CV RMSE": 9.1435229995,
+        "CV R2": 0.1145535423,
+        "CV fit seconds": 0.8736391068
       },
       {
         "Model": "Median benchmark",
         "Family": "Benchmark",
-        "CV MAE": 6.4857619599,
-        "MAE std": 1.2029980983,
-        "CV RMSE": 9.6616404281,
-        "CV R2": -0.1117505657,
-        "CV fit seconds": 0.0123450756
-      },
-      {
-        "Model": "Mean benchmark",
-        "Family": "Benchmark",
-        "CV MAE": 6.4965986076,
-        "MAE std": 1.0157791658,
-        "CV RMSE": 9.3329074082,
-        "CV R2": -0.0412906528,
-        "CV fit seconds": 0.0137898922
+        "CV MAE": 6.6836396528,
+        "MAE std": 1.2750614291,
+        "CV RMSE": 10.1931693247,
+        "CV R2": -0.099324452,
+        "CV fit seconds": 0.0210478306
       },
       {
         "Model": "Ridge",
         "Family": "Linear",
-        "CV MAE": 7.0389401719,
-        "MAE std": 1.3622271666,
-        "CV RMSE": 9.8919124706,
-        "CV R2": -0.271817217,
-        "CV fit seconds": 0.8219797611
+        "CV MAE": 6.760169148,
+        "MAE std": 0.828961509,
+        "CV RMSE": 9.9803846206,
+        "CV R2": -0.1854818896,
+        "CV fit seconds": 1.3927872181
+      },
+      {
+        "Model": "Mean benchmark",
+        "Family": "Benchmark",
+        "CV MAE": 6.7772952386,
+        "MAE std": 1.0397799434,
+        "CV RMSE": 9.8824468212,
+        "CV R2": -0.0392890623,
+        "CV fit seconds": 0.0222187042
       },
       {
         "Model": "Linear Regression",
         "Family": "Linear",
-        "CV MAE": 7.8975033045,
-        "MAE std": 2.1013468367,
-        "CV RMSE": 11.1760278885,
-        "CV R2": -0.7779107643,
-        "CV fit seconds": 1.0532305241
+        "CV MAE": 7.4877114356,
+        "MAE std": 2.1606901671,
+        "CV RMSE": 11.3098597204,
+        "CV R2": -0.8643923264,
+        "CV fit seconds": 1.834633112
       }
     ],
     "tuning": [
       {
         "Model": "Boosting (absolute)",
-        "Initial CV MAE": 5.5054507639,
-        "Tuned CV MAE": 5.4720119294,
-        "MAE improvement": 0.0334388345,
+        "Initial CV MAE": 5.604267257,
+        "Tuned CV MAE": 5.5951225273,
+        "MAE improvement": 0.0091447297,
         "Best parameters": {
-          "model__n_estimators": 100,
+          "model__n_estimators": 200,
           "model__min_samples_leaf": 20,
           "model__max_depth": 2,
           "model__learning_rate": 0.05
@@ -168,9 +239,9 @@
       },
       {
         "Model": "Lasso",
-        "Initial CV MAE": 5.821603732,
-        "Tuned CV MAE": 5.4924804909,
-        "MAE improvement": 0.3291232411,
+        "Initial CV MAE": 6.0439736084,
+        "Tuned CV MAE": 5.6504789215,
+        "MAE improvement": 0.3934946869,
         "Best parameters": {
           "model__alpha": 0.088586679
         }
@@ -178,52 +249,52 @@
     ],
     "validation": [
       {
-        "Model": "Boosting (absolute) (initial)",
-        "Train MAE": 5.0672170398,
-        "MAE": 4.3354383877,
-        "RMSE": 6.4423057781,
-        "R2": 0.2538446621,
-        "Prediction ms/order": 0.0034153983
+        "Model": "Boosting (absolute) (tuned)",
+        "Train MAE": 5.2224427381,
+        "MAE": 4.2787663467,
+        "RMSE": 6.4097295146,
+        "R2": 0.2613716248,
+        "Prediction ms/order": 0.0026931621
       },
       {
-        "Model": "Boosting (absolute) (tuned)",
-        "Train MAE": 5.1572857433,
-        "MAE": 4.3790496126,
-        "RMSE": 6.4365477969,
-        "R2": 0.2551778582,
-        "Prediction ms/order": 0.0029595303
+        "Model": "Boosting (absolute) (initial)",
+        "Train MAE": 5.2237250621,
+        "MAE": 4.3278084321,
+        "RMSE": 6.4236894289,
+        "R2": 0.2581507658,
+        "Prediction ms/order": 0.0021517127
       },
       {
         "Model": "Lasso (tuned)",
-        "Train MAE": 5.4588285817,
-        "MAE": 4.9791369068,
-        "RMSE": 6.7068659331,
-        "R2": 0.1913030006,
-        "Prediction ms/order": 0.0012931296
+        "Train MAE": 5.6391470989,
+        "MAE": 5.0667851991,
+        "RMSE": 6.7723674337,
+        "R2": 0.1754298542,
+        "Prediction ms/order": 0.0012209387
       },
       {
         "Model": "Median benchmark (initial)",
-        "Train MAE": 6.3322770889,
-        "MAE": 5.5332665065,
-        "RMSE": 7.5055081218,
-        "R2": -0.0127605594,
-        "Prediction ms/order": 7.4705e-06
+        "Train MAE": 6.5069720839,
+        "MAE": 5.5617623711,
+        "RMSE": 7.5156775435,
+        "R2": -0.0155068536,
+        "Prediction ms/order": 2.7799e-06
       },
       {
         "Model": "Lasso (initial)",
-        "Train MAE": 5.912556809,
-        "MAE": 5.7772027808,
-        "RMSE": 7.2611666787,
-        "R2": 0.052106831,
-        "Prediction ms/order": 0.0013520923
+        "Train MAE": 6.0814430647,
+        "MAE": 5.8762170803,
+        "RMSE": 7.3321697036,
+        "R2": 0.033478325,
+        "Prediction ms/order": 0.0012282471
       },
       {
         "Model": "Mean benchmark (initial)",
-        "Train MAE": 6.5905956295,
-        "MAE": 6.4628182003,
-        "RMSE": 8.0609253318,
-        "R2": -0.1681977841,
-        "Prediction ms/order": 6.186e-06
+        "Train MAE": 6.7971862476,
+        "MAE": 6.5925289999,
+        "RMSE": 8.1591038998,
+        "R2": -0.1968273595,
+        "Prediction ms/order": 5.761e-06
       },
       {
         "Model": "Olist checkout estimate",
@@ -236,103 +307,115 @@
     ],
     "stability": [
       {
-        "Model": "Boosting absolute (initial)",
+        "Model": "Boosting (absolute) (tuned)",
         "seed_runs": 5,
-        "cv_mae": 5.5020047628,
-        "cv_seed_sd": 0.0031464031,
-        "validation_mae": 4.3365615395,
-        "validation_seed_sd": 0.0014479925,
-        "temporal_fold_sd": 1.128252025
+        "cv_mae": 5.5951225273,
+        "cv_seed_sd": 0.0,
+        "validation_mae": 4.2787663467,
+        "validation_seed_sd": 0.0,
+        "temporal_fold_sd": 1.2023539489
       },
       {
         "Model": "Lasso (tuned)",
         "seed_runs": 1,
-        "cv_mae": 5.4924804909,
+        "cv_mae": 5.6504789215,
         "cv_seed_sd": null,
-        "validation_mae": 4.9791369068,
+        "validation_mae": 5.0667851991,
         "validation_seed_sd": null,
-        "temporal_fold_sd": 0.8616996281
+        "temporal_fold_sd": 0.9043475441
       }
     ],
     "temporal_folds": [
       {
         "Fold": 1,
-        "Boosting absolute (initial)": 4.0010379526,
-        "Lasso (tuned)": 4.5646526459
+        "Boosting (absolute) (tuned)": 3.9404693424,
+        "Lasso (tuned)": 4.5869670907
       },
       {
         "Fold": 2,
-        "Boosting absolute (initial)": 4.5652148785,
-        "Lasso (tuned)": 4.5061398141
+        "Boosting (absolute) (tuned)": 4.899217515,
+        "Lasso (tuned)": 4.7706387701
       },
       {
         "Fold": 3,
-        "Boosting absolute (initial)": 6.9504632806,
-        "Lasso (tuned)": 6.6455505867
+        "Boosting (absolute) (tuned)": 6.5251635953,
+        "Lasso (tuned)": 6.3436227307
       },
       {
         "Fold": 4,
-        "Boosting absolute (initial)": 6.565380054,
-        "Lasso (tuned)": 6.2333717301
+        "Boosting (absolute) (tuned)": 7.3379030768,
+        "Lasso (tuned)": 6.9545851134
       },
       {
         "Fold": 5,
-        "Boosting absolute (initial)": 5.4279276481,
-        "Lasso (tuned)": 5.5126876778
+        "Boosting (absolute) (tuned)": 5.2728591072,
+        "Lasso (tuned)": 5.5965809026
       }
     ],
     "month_ablation": [
       {
-        "Model": "Boosting absolute (initial)",
+        "Model": "Boosting (absolute) (tuned)",
         "Features": "With month",
-        "CV MAE": 5.5054507639,
-        "Fold SD": 1.1254078077,
-        "Validation MAE": 4.3354383877,
-        "Validation RMSE": 6.4423057781,
-        "Validation R2": 0.2538446621,
+        "CV MAE": 5.5951225273,
+        "Fold SD": 1.2023539489,
+        "Validation MAE": 4.2787663467,
+        "Validation RMSE": 6.4097295146,
+        "Validation R2": 0.2613716248,
         "Change in CV MAE": 0.0,
         "Change in Validation MAE": 0.0
       },
       {
-        "Model": "Boosting absolute (initial)",
+        "Model": "Boosting (absolute) (tuned)",
         "Features": "Without month",
-        "CV MAE": 5.3334601453,
-        "Fold SD": 1.1496838605,
-        "Validation MAE": 4.4121572866,
-        "Validation RMSE": 6.3814955608,
-        "Validation R2": 0.2678644008,
-        "Change in CV MAE": -0.1719906185,
-        "Change in Validation MAE": 0.0767188989
+        "CV MAE": 5.4828350408,
+        "Fold SD": 1.2129925641,
+        "Validation MAE": 4.4292171772,
+        "Validation RMSE": 6.3782292662,
+        "Validation R2": 0.2686136792,
+        "Change in CV MAE": -0.1122874865,
+        "Change in Validation MAE": 0.1504508305
       },
       {
         "Model": "Lasso (tuned)",
         "Features": "With month",
-        "CV MAE": 5.4924804909,
-        "Fold SD": 0.8616996281,
-        "Validation MAE": 4.9791369068,
-        "Validation RMSE": 6.7068659331,
-        "Validation R2": 0.1913030006,
+        "CV MAE": 5.6504789215,
+        "Fold SD": 0.9043475441,
+        "Validation MAE": 5.0667851991,
+        "Validation RMSE": 6.7723674337,
+        "Validation R2": 0.1754298542,
         "Change in CV MAE": 0.0,
         "Change in Validation MAE": 0.0
       },
       {
         "Model": "Lasso (tuned)",
         "Features": "Without month",
-        "CV MAE": 5.4473928125,
-        "Fold SD": 0.9110559314,
-        "Validation MAE": 5.4154734308,
-        "Validation RMSE": 6.9930807713,
-        "Validation R2": 0.120808116,
-        "Change in CV MAE": -0.0450876784,
-        "Change in Validation MAE": 0.436336524
+        "CV MAE": 5.6609677251,
+        "Fold SD": 0.9048323836,
+        "Validation MAE": 5.507444458,
+        "Validation RMSE": 7.0726629865,
+        "Validation R2": 0.1006836064,
+        "Change in CV MAE": 0.0104888036,
+        "Change in Validation MAE": 0.4406592589
       }
     ],
     "final_test": [
       {
-        "Model": "Boosting absolute (initial)",
-        "MAE": 3.9154472014,
-        "RMSE": 5.1576858496,
-        "R2": 0.0779945848
+        "Model": "Boosting (absolute) (tuned)",
+        "MAE": 3.8630441051,
+        "RMSE": 5.1333396153,
+        "R2": 0.0866784715
+      },
+      {
+        "Model": "Mean benchmark (initial)",
+        "MAE": 6.6612805314,
+        "RMSE": 7.5862571792,
+        "R2": -0.9947056721
+      },
+      {
+        "Model": "Median benchmark (initial)",
+        "MAE": 5.0065348733,
+        "RMSE": 6.1412692389,
+        "R2": -0.3071937868
       },
       {
         "Model": "Olist checkout estimate",
