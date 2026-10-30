@@ -1,5 +1,86 @@
 {
   "selected_model": "Boosting (absolute) (tuned)",
+  "model_type": "GradientBoostingRegressor",
+  "selection_metric": "Validation MAE",
+  "validation_metrics": {
+    "MAE": 4.274001933062527,
+    "RMSE": 6.407510226542969,
+    "R2": 0.2618830177361846
+  },
+  "candidate_roles": {
+    "Mean benchmark": "Benchmark",
+    "Median benchmark": "Benchmark",
+    "Linear Regression": "Linear",
+    "Ridge": "Linear",
+    "Lasso": "Linear",
+    "Decision Tree": "Single tree",
+    "Random Forest": "Ensemble",
+    "Boosting (squared)": "Ensemble",
+    "Boosting (absolute)": "Ensemble",
+    "Boosting (Huber)": "Ensemble"
+  },
+  "validation_model_info": {
+    "Mean benchmark (initial)": {
+      "Base model": "Mean benchmark",
+      "Stage": "initial",
+      "Family": "Benchmark",
+      "Role": "Benchmark"
+    },
+    "Median benchmark (initial)": {
+      "Base model": "Median benchmark",
+      "Stage": "initial",
+      "Family": "Benchmark",
+      "Role": "Benchmark"
+    },
+    "Lasso (initial)": {
+      "Base model": "Lasso",
+      "Stage": "initial",
+      "Family": "Linear",
+      "Role": "Linear"
+    },
+    "Lasso (tuned)": {
+      "Base model": "Lasso",
+      "Stage": "tuned",
+      "Family": "Linear",
+      "Role": "Linear"
+    },
+    "Ridge (initial)": {
+      "Base model": "Ridge",
+      "Stage": "initial",
+      "Family": "Linear",
+      "Role": "Linear"
+    },
+    "Ridge (tuned)": {
+      "Base model": "Ridge",
+      "Stage": "tuned",
+      "Family": "Linear",
+      "Role": "Linear"
+    },
+    "Boosting (absolute) (initial)": {
+      "Base model": "Boosting (absolute)",
+      "Stage": "initial",
+      "Family": "Tree",
+      "Role": "Ensemble"
+    },
+    "Boosting (absolute) (tuned)": {
+      "Base model": "Boosting (absolute)",
+      "Stage": "tuned",
+      "Family": "Tree",
+      "Role": "Ensemble"
+    },
+    "Decision Tree (initial)": {
+      "Base model": "Decision Tree",
+      "Stage": "initial",
+      "Family": "Tree",
+      "Role": "Single tree"
+    },
+    "Decision Tree (tuned)": {
+      "Base model": "Decision Tree",
+      "Stage": "tuned",
+      "Family": "Tree",
+      "Role": "Single tree"
+    }
+  },
   "evaluation_design": "Retrospective purchase-time cohorts with eventual delivery labels",
   "model_parameters": {
     "alpha": 0.9,
@@ -43,6 +124,9 @@
     "is_weekend",
     "is_interstate"
   ],
+  "feature_definitions": {
+    "is_interstate": "Buyer state differs from farthest seller state; unknown routes remain missing"
+  },
   "versions": {
     "python": "3.9.6",
     "scikit-learn": "1.6.1",
@@ -78,7 +162,7 @@
         "Last purchase used": 1530403189000
       },
       {
-        "Split": "Test (reused holdout)",
+        "Split": "Test",
         "Orders": 12507,
         "Mean delivery days": 8.3361516495,
         "First purchase used": 1530404707000,
@@ -132,51 +216,197 @@
         "Validation end": 1525132046000
       }
     ],
+    "delivery_trend": [
+      {
+        "order_purchase_timestamp": 1472688000000,
+        "mean_days": 54.8131944444,
+        "median_days": 54.8131944444,
+        "orders": 1
+      },
+      {
+        "order_purchase_timestamp": 1475280000000,
+        "mean_days": 19.6005587876,
+        "median_days": 17.9442824074,
+        "orders": 265
+      },
+      {
+        "order_purchase_timestamp": 1477958400000,
+        "mean_days": null,
+        "median_days": null,
+        "orders": 0
+      },
+      {
+        "order_purchase_timestamp": 1480550400000,
+        "mean_days": 4.6930208333,
+        "median_days": 4.6930208333,
+        "orders": 1
+      },
+      {
+        "order_purchase_timestamp": 1483228800000,
+        "mean_days": 12.6470435185,
+        "median_days": 10.7336458333,
+        "orders": 750
+      },
+      {
+        "order_purchase_timestamp": 1485907200000,
+        "mean_days": 13.168825249,
+        "median_days": 10.9712037037,
+        "orders": 1653
+      },
+      {
+        "order_purchase_timestamp": 1488326400000,
+        "mean_days": 12.9511844878,
+        "median_days": 10.1264872685,
+        "orders": 2546
+      },
+      {
+        "order_purchase_timestamp": 1491004800000,
+        "mean_days": 14.9179125004,
+        "median_days": 12.7486226852,
+        "orders": 2303
+      },
+      {
+        "order_purchase_timestamp": 1493596800000,
+        "mean_days": 11.3223629754,
+        "median_days": 9.7933333333,
+        "orders": 3545
+      },
+      {
+        "order_purchase_timestamp": 1496275200000,
+        "mean_days": 12.0115727044,
+        "median_days": 10.8049074074,
+        "orders": 3135
+      },
+      {
+        "order_purchase_timestamp": 1498867200000,
+        "mean_days": 11.5927323872,
+        "median_days": 10.1580729167,
+        "orders": 3872
+      },
+      {
+        "order_purchase_timestamp": 1501545600000,
+        "mean_days": 11.1471246555,
+        "median_days": 9.7698148148,
+        "orders": 4193
+      },
+      {
+        "order_purchase_timestamp": 1504224000000,
+        "mean_days": 11.8510065289,
+        "median_days": 10.3144328704,
+        "orders": 4150
+      },
+      {
+        "order_purchase_timestamp": 1506816000000,
+        "mean_days": 11.8566996985,
+        "median_days": 10.2633622685,
+        "orders": 4478
+      },
+      {
+        "order_purchase_timestamp": 1509494400000,
+        "mean_days": 15.1611316992,
+        "median_days": 12.6986805556,
+        "orders": 7288
+      },
+      {
+        "order_purchase_timestamp": 1512086400000,
+        "mean_days": 15.3949185301,
+        "median_days": 13.1421875,
+        "orders": 5513
+      },
+      {
+        "order_purchase_timestamp": 1514764800000,
+        "mean_days": 14.080562614,
+        "median_days": 11.8301157407,
+        "orders": 7069
+      },
+      {
+        "order_purchase_timestamp": 1517443200000,
+        "mean_days": 16.9451375682,
+        "median_days": 14.26375,
+        "orders": 6555
+      },
+      {
+        "order_purchase_timestamp": 1519862400000,
+        "mean_days": 16.3014101744,
+        "median_days": 13.3677314815,
+        "orders": 7003
+      },
+      {
+        "order_purchase_timestamp": 1522540800000,
+        "mean_days": 11.4992410537,
+        "median_days": 9.3147280093,
+        "orders": 6798
+      },
+      {
+        "order_purchase_timestamp": 1525132800000,
+        "mean_days": 11.4190289354,
+        "median_days": 9.1478703704,
+        "orders": 6749
+      },
+      {
+        "order_purchase_timestamp": 1527811200000,
+        "mean_days": 9.2392162932,
+        "median_days": 7.9576157407,
+        "orders": 6096
+      },
+      {
+        "order_purchase_timestamp": 1530403200000,
+        "mean_days": 8.9586362372,
+        "median_days": 7.501724537,
+        "orders": 6156
+      },
+      {
+        "order_purchase_timestamp": 1533081600000,
+        "mean_days": 7.7327797205,
+        "median_days": 7.0137037037,
+        "orders": 6351
+      }
+    ],
     "screening": [
       {
         "Model": "Boosting (absolute)",
         "Family": "Tree",
-        "CV MAE": 5.604267257,
-        "MAE std": 1.2104073261,
-        "CV RMSE": 9.1760494228,
-        "CV R2": 0.1128364712,
-        "CV fit seconds": 46.3478417397
+        "CV MAE": 5.5997379195,
+        "MAE std": 1.2145822324,
+        "CV RMSE": 9.1743323394,
+        "CV R2": 0.1131642322,
+        "CV fit seconds": 27.1451900005
       },
       {
         "Model": "Boosting (Huber)",
         "Family": "Tree",
-        "CV MAE": 5.6657142128,
-        "MAE std": 1.0390622576,
-        "CV RMSE": 9.0299345127,
-        "CV R2": 0.1379852185,
-        "CV fit seconds": 46.4071891308
+        "CV MAE": 5.6740943578,
+        "MAE std": 1.0320303389,
+        "CV RMSE": 9.039049454,
+        "CV R2": 0.1358659171,
+        "CV fit seconds": 28.9414880276
       },
       {
         "Model": "Random Forest",
         "Family": "Tree",
-        "CV MAE": 5.8090869014,
-        "MAE std": 0.8587151676,
-        "CV RMSE": 8.9142752423,
-        "CV R2": 0.1521947285,
-        "CV fit seconds": 60.9376749992
+        "CV MAE": 5.8127809987,
+        "MAE std": 0.8587210345,
+        "CV RMSE": 8.917232446,
+        "CV R2": 0.1515544255,
+        "CV fit seconds": 36.4532940388
       },
       {
         "Model": "Boosting (squared)",
         "Family": "Tree",
-        "CV MAE": 5.8394784222,
-        "MAE std": 0.8086296157,
-        "CV RMSE": 8.9561801668,
-        "CV R2": 0.1433850823,
-        "CV fit seconds": 41.3624927998
+        "CV MAE": 5.8321087816,
+        "MAE std": 0.8121886589,
+        "CV RMSE": 8.9473531157,
+        "CV R2": 0.1451737574,
+        "CV fit seconds": 25.1347799301
       },
       {
         "Model": "Decision Tree",
         "Family": "Tree",
-        "CV MAE": 5.9388081962,
-        "MAE std": 0.7861240925,
-        "CV RMSE": 9.0763231504,
-        "CV R2": 0.117720528,
-        "CV fit seconds": 3.0042021275
+        "CV MAE": 5.920797718,
+        "MAE std": 0.7896572702,
+        "CV RMSE": 9.0703635841,
+        "CV R2": 0.118711325,
+        "CV fit seconds": 1.8184337616
       },
       {
         "Model": "Lasso",
@@ -185,7 +415,7 @@
         "MAE std": 1.0059206198,
         "CV RMSE": 9.1435229995,
         "CV R2": 0.1145535423,
-        "CV fit seconds": 0.8736391068
+        "CV fit seconds": 0.6589479446
       },
       {
         "Model": "Median benchmark",
@@ -194,16 +424,16 @@
         "MAE std": 1.2750614291,
         "CV RMSE": 10.1931693247,
         "CV R2": -0.099324452,
-        "CV fit seconds": 0.0210478306
+        "CV fit seconds": 0.0193626881
       },
       {
         "Model": "Ridge",
         "Family": "Linear",
-        "CV MAE": 6.760169148,
-        "MAE std": 0.828961509,
-        "CV RMSE": 9.9803846206,
-        "CV R2": -0.1854818896,
-        "CV fit seconds": 1.3927872181
+        "CV MAE": 6.7601980348,
+        "MAE std": 0.8290564018,
+        "CV RMSE": 9.9804939264,
+        "CV R2": -0.1855399295,
+        "CV fit seconds": 1.0456676483
       },
       {
         "Model": "Mean benchmark",
@@ -212,65 +442,118 @@
         "MAE std": 1.0397799434,
         "CV RMSE": 9.8824468212,
         "CV R2": -0.0392890623,
-        "CV fit seconds": 0.0222187042
+        "CV fit seconds": 0.0155260563
       },
       {
         "Model": "Linear Regression",
         "Family": "Linear",
-        "CV MAE": 7.4877114356,
-        "MAE std": 2.1606901671,
-        "CV RMSE": 11.3098597204,
-        "CV R2": -0.8643923264,
-        "CV fit seconds": 1.834633112
+        "CV MAE": 7.4874615755,
+        "MAE std": 2.160721531,
+        "CV RMSE": 11.3097437248,
+        "CV R2": -0.8644270412,
+        "CV fit seconds": 1.3705639839
       }
     ],
     "tuning": [
       {
+        "Model": "Lasso",
+        "Initial CV MAE": 6.0439736084,
+        "Tuned CV MAE": 5.6510907271,
+        "MAE improvement": 0.3928828813,
+        "Best parameters": {
+          "model__alpha": 0.088586679
+        }
+      },
+      {
+        "Model": "Ridge",
+        "Initial CV MAE": 6.7601980348,
+        "Tuned CV MAE": 5.8264084898,
+        "MAE improvement": 0.933789545,
+        "Best parameters": {
+          "model__alpha": 233.572146909
+        }
+      },
+      {
+        "Model": "Decision Tree",
+        "Initial CV MAE": 5.920797718,
+        "Tuned CV MAE": 5.6246620528,
+        "MAE improvement": 0.2961356652,
+        "Best parameters": {
+          "model__min_samples_split": 200,
+          "model__min_samples_leaf": 100,
+          "model__max_depth": 8,
+          "model__ccp_alpha": 0.001
+        }
+      },
+      {
         "Model": "Boosting (absolute)",
-        "Initial CV MAE": 5.604267257,
-        "Tuned CV MAE": 5.5951225273,
-        "MAE improvement": 0.0091447297,
+        "Initial CV MAE": 5.5997379195,
+        "Tuned CV MAE": 5.5924662201,
+        "MAE improvement": 0.0072716994,
         "Best parameters": {
           "model__n_estimators": 200,
           "model__min_samples_leaf": 20,
           "model__max_depth": 2,
           "model__learning_rate": 0.05
         }
-      },
-      {
-        "Model": "Lasso",
-        "Initial CV MAE": 6.0439736084,
-        "Tuned CV MAE": 5.6504789215,
-        "MAE improvement": 0.3934946869,
-        "Best parameters": {
-          "model__alpha": 0.088586679
-        }
       }
     ],
     "validation": [
       {
         "Model": "Boosting (absolute) (tuned)",
-        "Train MAE": 5.2224427381,
-        "MAE": 4.2787663467,
-        "RMSE": 6.4097295146,
-        "R2": 0.2613716248,
-        "Prediction ms/order": 0.0026931621
+        "Train MAE": 5.223404101,
+        "MAE": 4.2740019331,
+        "RMSE": 6.4075102265,
+        "R2": 0.2618830177,
+        "Prediction ms/order": 0.0029072759
       },
       {
         "Model": "Boosting (absolute) (initial)",
-        "Train MAE": 5.2237250621,
-        "MAE": 4.3278084321,
-        "RMSE": 6.4236894289,
-        "R2": 0.2581507658,
-        "Prediction ms/order": 0.0021517127
+        "Train MAE": 5.2270484733,
+        "MAE": 4.3402843075,
+        "RMSE": 6.4347051878,
+        "R2": 0.2556042419,
+        "Prediction ms/order": 0.0021834891
+      },
+      {
+        "Model": "Ridge (initial)",
+        "Train MAE": 5.5203478347,
+        "MAE": 4.6265015167,
+        "RMSE": 6.5859495134,
+        "R2": 0.2201997397,
+        "Prediction ms/order": 0.0012107662
+      },
+      {
+        "Model": "Ridge (tuned)",
+        "Train MAE": 5.523857333,
+        "MAE": 4.6507801923,
+        "RMSE": 6.5780795685,
+        "R2": 0.2220622861,
+        "Prediction ms/order": 0.0012167186
+      },
+      {
+        "Model": "Decision Tree (initial)",
+        "Train MAE": 5.3192403043,
+        "MAE": 4.7639877724,
+        "RMSE": 6.6232115591,
+        "R2": 0.2113508555,
+        "Prediction ms/order": 0.0013614052
+      },
+      {
+        "Model": "Decision Tree (tuned)",
+        "Train MAE": 5.4504541257,
+        "MAE": 4.8286456166,
+        "RMSE": 6.7008675842,
+        "R2": 0.1927488854,
+        "Prediction ms/order": 0.0013410276
       },
       {
         "Model": "Lasso (tuned)",
-        "Train MAE": 5.6391470989,
-        "MAE": 5.0667851991,
-        "RMSE": 6.7723674337,
-        "R2": 0.1754298542,
-        "Prediction ms/order": 0.0012209387
+        "Train MAE": 5.6389352821,
+        "MAE": 5.067415295,
+        "RMSE": 6.7736846033,
+        "R2": 0.1751090788,
+        "Prediction ms/order": 0.0012349844
       },
       {
         "Model": "Median benchmark (initial)",
@@ -278,7 +561,7 @@
         "MAE": 5.5617623711,
         "RMSE": 7.5156775435,
         "R2": -0.0155068536,
-        "Prediction ms/order": 2.7799e-06
+        "Prediction ms/order": 2.9973e-06
       },
       {
         "Model": "Lasso (initial)",
@@ -286,7 +569,7 @@
         "MAE": 5.8762170803,
         "RMSE": 7.3321697036,
         "R2": 0.033478325,
-        "Prediction ms/order": 0.0012282471
+        "Prediction ms/order": 0.0012909044
       },
       {
         "Model": "Mean benchmark (initial)",
@@ -294,7 +577,7 @@
         "MAE": 6.5925289999,
         "RMSE": 8.1591038998,
         "R2": -0.1968273595,
-        "Prediction ms/order": 5.761e-06
+        "Prediction ms/order": 7.0618e-06
       },
       {
         "Model": "Olist checkout estimate",
@@ -305,105 +588,670 @@
         "Prediction ms/order": null
       }
     ],
-    "stability": [
+    "permutation": [
       {
         "Model": "Boosting (absolute) (tuned)",
-        "seed_runs": 5,
-        "cv_mae": 5.5951225273,
-        "cv_seed_sd": 0.0,
-        "validation_mae": 4.2787663467,
-        "validation_seed_sd": 0.0,
-        "temporal_fold_sd": 1.2023539489
+        "Feature": "max_seller_buyer_distance_km",
+        "MAE increase": 0.6500170407,
+        "Shuffle SD": 0.015141241,
+        "Rank": 1
       },
       {
-        "Model": "Lasso (tuned)",
-        "seed_runs": 1,
-        "cv_mae": 5.6504789215,
-        "cv_seed_sd": null,
-        "validation_mae": 5.0667851991,
-        "validation_seed_sd": null,
-        "temporal_fold_sd": 0.9043475441
+        "Model": "Boosting (absolute) (tuned)",
+        "Feature": "is_interstate",
+        "MAE increase": 0.3931492415,
+        "Shuffle SD": 0.0160717959,
+        "Rank": 2
+      },
+      {
+        "Model": "Boosting (absolute) (tuned)",
+        "Feature": "total_freight",
+        "MAE increase": 0.0858724451,
+        "Shuffle SD": 0.0063449225,
+        "Rank": 3
+      },
+      {
+        "Model": "Boosting (absolute) (tuned)",
+        "Feature": "farthest_seller_state",
+        "MAE increase": 0.0586195343,
+        "Shuffle SD": 0.0052167432,
+        "Rank": 4
+      },
+      {
+        "Model": "Boosting (absolute) (tuned)",
+        "Feature": "main_product_category",
+        "MAE increase": 0.0405434364,
+        "Shuffle SD": 0.0026854737,
+        "Rank": 5
+      },
+      {
+        "Model": "Boosting (absolute) (tuned)",
+        "Feature": "purchase_day_of_week",
+        "MAE increase": 0.0222728184,
+        "Shuffle SD": 0.001560059,
+        "Rank": 6
+      },
+      {
+        "Model": "Boosting (absolute) (tuned)",
+        "Feature": "total_physical_score",
+        "MAE increase": 0.0126129981,
+        "Shuffle SD": 0.0010131748,
+        "Rank": 7
+      },
+      {
+        "Model": "Boosting (absolute) (tuned)",
+        "Feature": "n_sellers",
+        "MAE increase": 0.0093486649,
+        "Shuffle SD": 0.0030707778,
+        "Rank": 8
+      },
+      {
+        "Model": "Boosting (absolute) (tuned)",
+        "Feature": "n_items",
+        "MAE increase": 0.0039044892,
+        "Shuffle SD": 0.0022625264,
+        "Rank": 9
+      },
+      {
+        "Model": "Boosting (absolute) (tuned)",
+        "Feature": "n_unique_products",
+        "MAE increase": 0.0008249311,
+        "Shuffle SD": 0.0005465989,
+        "Rank": 10
+      },
+      {
+        "Model": "Boosting (absolute) (tuned)",
+        "Feature": "total_product_weight_g",
+        "MAE increase": 0.0005356465,
+        "Shuffle SD": 0.000138869,
+        "Rank": 11
+      },
+      {
+        "Model": "Boosting (absolute) (tuned)",
+        "Feature": "n_seller_states",
+        "MAE increase": 0.0004996155,
+        "Shuffle SD": 8.26321e-05,
+        "Rank": 12
+      },
+      {
+        "Model": "Boosting (absolute) (tuned)",
+        "Feature": "freight_ratio",
+        "MAE increase": 0.0001303494,
+        "Shuffle SD": 0.000543297,
+        "Rank": 13
+      },
+      {
+        "Model": "Boosting (absolute) (tuned)",
+        "Feature": "n_product_categories",
+        "MAE increase": 0.0,
+        "Shuffle SD": 0.0,
+        "Rank": 14
+      },
+      {
+        "Model": "Boosting (absolute) (tuned)",
+        "Feature": "purchase_hour",
+        "MAE increase": 0.0,
+        "Shuffle SD": 0.0,
+        "Rank": 15
+      },
+      {
+        "Model": "Boosting (absolute) (tuned)",
+        "Feature": "is_weekend",
+        "MAE increase": 0.0,
+        "Shuffle SD": 0.0,
+        "Rank": 16
+      },
+      {
+        "Model": "Boosting (absolute) (tuned)",
+        "Feature": "purchase_month",
+        "MAE increase": -0.0586118753,
+        "Shuffle SD": 0.0029617092,
+        "Rank": 17
+      },
+      {
+        "Model": "Ridge (initial)",
+        "Feature": "max_seller_buyer_distance_km",
+        "MAE increase": 0.5899312757,
+        "Shuffle SD": 0.0193170945,
+        "Rank": 1
+      },
+      {
+        "Model": "Ridge (initial)",
+        "Feature": "is_interstate",
+        "MAE increase": 0.5118711064,
+        "Shuffle SD": 0.0221803966,
+        "Rank": 2
+      },
+      {
+        "Model": "Ridge (initial)",
+        "Feature": "farthest_seller_state",
+        "MAE increase": 0.1304956133,
+        "Shuffle SD": 0.0096579153,
+        "Rank": 3
+      },
+      {
+        "Model": "Ridge (initial)",
+        "Feature": "main_product_category",
+        "MAE increase": 0.1010844616,
+        "Shuffle SD": 0.0070798944,
+        "Rank": 4
+      },
+      {
+        "Model": "Ridge (initial)",
+        "Feature": "total_freight",
+        "MAE increase": 0.0266966366,
+        "Shuffle SD": 0.0062622785,
+        "Rank": 5
+      },
+      {
+        "Model": "Ridge (initial)",
+        "Feature": "n_items",
+        "MAE increase": 0.0203545334,
+        "Shuffle SD": 0.0075609735,
+        "Rank": 6
+      },
+      {
+        "Model": "Ridge (initial)",
+        "Feature": "purchase_day_of_week",
+        "MAE increase": 0.019954218,
+        "Shuffle SD": 0.0033684881,
+        "Rank": 7
+      },
+      {
+        "Model": "Ridge (initial)",
+        "Feature": "total_product_weight_g",
+        "MAE increase": 0.0188802588,
+        "Shuffle SD": 0.0033759729,
+        "Rank": 8
+      },
+      {
+        "Model": "Ridge (initial)",
+        "Feature": "n_sellers",
+        "MAE increase": 0.0042350607,
+        "Shuffle SD": 0.003680077,
+        "Rank": 9
+      },
+      {
+        "Model": "Ridge (initial)",
+        "Feature": "purchase_hour",
+        "MAE increase": 0.0024969977,
+        "Shuffle SD": 0.0018833566,
+        "Rank": 10
+      },
+      {
+        "Model": "Ridge (initial)",
+        "Feature": "freight_ratio",
+        "MAE increase": 0.0013870573,
+        "Shuffle SD": 0.000556905,
+        "Rank": 11
+      },
+      {
+        "Model": "Ridge (initial)",
+        "Feature": "is_weekend",
+        "MAE increase": 0.0003182807,
+        "Shuffle SD": 0.0005107625,
+        "Rank": 12
+      },
+      {
+        "Model": "Ridge (initial)",
+        "Feature": "n_seller_states",
+        "MAE increase": -0.0003217855,
+        "Shuffle SD": 0.0023581335,
+        "Rank": 13
+      },
+      {
+        "Model": "Ridge (initial)",
+        "Feature": "total_physical_score",
+        "MAE increase": -0.0009721971,
+        "Shuffle SD": 0.00125611,
+        "Rank": 14
+      },
+      {
+        "Model": "Ridge (initial)",
+        "Feature": "n_unique_products",
+        "MAE increase": -0.0014722298,
+        "Shuffle SD": 0.0006658121,
+        "Rank": 15
+      },
+      {
+        "Model": "Ridge (initial)",
+        "Feature": "n_product_categories",
+        "MAE increase": -0.0030871436,
+        "Shuffle SD": 0.0010823592,
+        "Rank": 16
+      },
+      {
+        "Model": "Ridge (initial)",
+        "Feature": "purchase_month",
+        "MAE increase": -0.0801589708,
+        "Shuffle SD": 0.0045973785,
+        "Rank": 17
+      },
+      {
+        "Model": "Decision Tree (initial)",
+        "Feature": "max_seller_buyer_distance_km",
+        "MAE increase": 0.4201620007,
+        "Shuffle SD": 0.0133111614,
+        "Rank": 1
+      },
+      {
+        "Model": "Decision Tree (initial)",
+        "Feature": "is_interstate",
+        "MAE increase": 0.2152250408,
+        "Shuffle SD": 0.021091016,
+        "Rank": 2
+      },
+      {
+        "Model": "Decision Tree (initial)",
+        "Feature": "farthest_seller_state",
+        "MAE increase": 0.0768064639,
+        "Shuffle SD": 0.0066134796,
+        "Rank": 3
+      },
+      {
+        "Model": "Decision Tree (initial)",
+        "Feature": "main_product_category",
+        "MAE increase": 0.0577090975,
+        "Shuffle SD": 0.0063122383,
+        "Rank": 4
+      },
+      {
+        "Model": "Decision Tree (initial)",
+        "Feature": "freight_ratio",
+        "MAE increase": 0.0197990086,
+        "Shuffle SD": 0.0041045105,
+        "Rank": 5
+      },
+      {
+        "Model": "Decision Tree (initial)",
+        "Feature": "total_freight",
+        "MAE increase": 0.0148232247,
+        "Shuffle SD": 0.0096324083,
+        "Rank": 6
+      },
+      {
+        "Model": "Decision Tree (initial)",
+        "Feature": "n_sellers",
+        "MAE increase": 0.0133003336,
+        "Shuffle SD": 0.0054446844,
+        "Rank": 7
+      },
+      {
+        "Model": "Decision Tree (initial)",
+        "Feature": "is_weekend",
+        "MAE increase": 0.0025945157,
+        "Shuffle SD": 0.0008744583,
+        "Rank": 8
+      },
+      {
+        "Model": "Decision Tree (initial)",
+        "Feature": "n_seller_states",
+        "MAE increase": 0.000855093,
+        "Shuffle SD": 0.0001508924,
+        "Rank": 9
+      },
+      {
+        "Model": "Decision Tree (initial)",
+        "Feature": "n_product_categories",
+        "MAE increase": 0.0,
+        "Shuffle SD": 0.0,
+        "Rank": 10
+      },
+      {
+        "Model": "Decision Tree (initial)",
+        "Feature": "n_unique_products",
+        "MAE increase": 0.0,
+        "Shuffle SD": 0.0,
+        "Rank": 11
+      },
+      {
+        "Model": "Decision Tree (initial)",
+        "Feature": "n_items",
+        "MAE increase": 0.0,
+        "Shuffle SD": 0.0,
+        "Rank": 12
+      },
+      {
+        "Model": "Decision Tree (initial)",
+        "Feature": "purchase_hour",
+        "MAE increase": -0.0015494662,
+        "Shuffle SD": 0.0012371154,
+        "Rank": 13
+      },
+      {
+        "Model": "Decision Tree (initial)",
+        "Feature": "purchase_day_of_week",
+        "MAE increase": -0.0030408842,
+        "Shuffle SD": 0.0031887454,
+        "Rank": 14
+      },
+      {
+        "Model": "Decision Tree (initial)",
+        "Feature": "total_product_weight_g",
+        "MAE increase": -0.0116045516,
+        "Shuffle SD": 0.0050305084,
+        "Rank": 15
+      },
+      {
+        "Model": "Decision Tree (initial)",
+        "Feature": "total_physical_score",
+        "MAE increase": -0.0186250279,
+        "Shuffle SD": 0.007079224,
+        "Rank": 16
+      },
+      {
+        "Model": "Decision Tree (initial)",
+        "Feature": "purchase_month",
+        "MAE increase": -0.0298423021,
+        "Shuffle SD": 0.0073122658,
+        "Rank": 17
+      }
+    ],
+    "tree_refinement": [
+      {
+        "Model": "Decision Tree",
+        "Stage": "tuned",
+        "CV MAE": 5.6246620528,
+        "MAE gain vs tuned tree": 0.0,
+        "Folds better than tuned tree": 0,
+        "Refine": false
+      },
+      {
+        "Model": "Random Forest",
+        "Stage": "initial",
+        "CV MAE": 5.8127809987,
+        "MAE gain vs tuned tree": -0.1881189459,
+        "Folds better than tuned tree": 3,
+        "Refine": false
+      },
+      {
+        "Model": "Boosting (squared)",
+        "Stage": "initial",
+        "CV MAE": 5.8321087816,
+        "MAE gain vs tuned tree": -0.2074467288,
+        "Folds better than tuned tree": 3,
+        "Refine": false
+      },
+      {
+        "Model": "Boosting (absolute)",
+        "Stage": "initial",
+        "CV MAE": 5.5997379195,
+        "MAE gain vs tuned tree": 0.0249241333,
+        "Folds better than tuned tree": 2,
+        "Refine": true
+      },
+      {
+        "Model": "Boosting (Huber)",
+        "Stage": "initial",
+        "CV MAE": 5.6740943578,
+        "MAE gain vs tuned tree": -0.049432305,
+        "Folds better than tuned tree": 1,
+        "Refine": false
+      }
+    ],
+    "tree_seed_runs": [
+      {
+        "Seed": 42,
+        "CV MAE": 5.6246620528
+      },
+      {
+        "Seed": 101,
+        "CV MAE": 5.6246620528
+      },
+      {
+        "Seed": 2023,
+        "CV MAE": 5.6246620528
+      },
+      {
+        "Seed": 777,
+        "CV MAE": 5.6246620528
+      },
+      {
+        "Seed": 999,
+        "CV MAE": 5.6246620528
+      }
+    ],
+    "tree_seed_summary": [
+      {
+        "Model": "Decision Tree (tuned)",
+        "Runs": 5,
+        "Mean CV MAE": 5.6246620528,
+        "Seed SD": 6.280369835e-16
+      }
+    ],
+    "tree_seed_folds": [
+      {
+        "Seed": 42,
+        "Fold": 1,
+        "MAE": 4.5914140692
+      },
+      {
+        "Seed": 42,
+        "Fold": 2,
+        "MAE": 4.7426734585
+      },
+      {
+        "Seed": 42,
+        "Fold": 3,
+        "MAE": 6.2519019377
+      },
+      {
+        "Seed": 42,
+        "Fold": 4,
+        "MAE": 7.0488849407
+      },
+      {
+        "Seed": 42,
+        "Fold": 5,
+        "MAE": 5.488435858
+      },
+      {
+        "Seed": 101,
+        "Fold": 1,
+        "MAE": 4.5914140692
+      },
+      {
+        "Seed": 101,
+        "Fold": 2,
+        "MAE": 4.7426734585
+      },
+      {
+        "Seed": 101,
+        "Fold": 3,
+        "MAE": 6.2519019377
+      },
+      {
+        "Seed": 101,
+        "Fold": 4,
+        "MAE": 7.0488849407
+      },
+      {
+        "Seed": 101,
+        "Fold": 5,
+        "MAE": 5.488435858
+      },
+      {
+        "Seed": 2023,
+        "Fold": 1,
+        "MAE": 4.5914140692
+      },
+      {
+        "Seed": 2023,
+        "Fold": 2,
+        "MAE": 4.7426734585
+      },
+      {
+        "Seed": 2023,
+        "Fold": 3,
+        "MAE": 6.2519019377
+      },
+      {
+        "Seed": 2023,
+        "Fold": 4,
+        "MAE": 7.0488849407
+      },
+      {
+        "Seed": 2023,
+        "Fold": 5,
+        "MAE": 5.488435858
+      },
+      {
+        "Seed": 777,
+        "Fold": 1,
+        "MAE": 4.5914140692
+      },
+      {
+        "Seed": 777,
+        "Fold": 2,
+        "MAE": 4.7426734585
+      },
+      {
+        "Seed": 777,
+        "Fold": 3,
+        "MAE": 6.2519019377
+      },
+      {
+        "Seed": 777,
+        "Fold": 4,
+        "MAE": 7.0488849407
+      },
+      {
+        "Seed": 777,
+        "Fold": 5,
+        "MAE": 5.488435858
+      },
+      {
+        "Seed": 999,
+        "Fold": 1,
+        "MAE": 4.5914140692
+      },
+      {
+        "Seed": 999,
+        "Fold": 2,
+        "MAE": 4.7426734585
+      },
+      {
+        "Seed": 999,
+        "Fold": 3,
+        "MAE": 6.2519019377
+      },
+      {
+        "Seed": 999,
+        "Fold": 4,
+        "MAE": 7.0488849407
+      },
+      {
+        "Seed": 999,
+        "Fold": 5,
+        "MAE": 5.488435858
       }
     ],
     "temporal_folds": [
       {
         "Fold": 1,
-        "Boosting (absolute) (tuned)": 3.9404693424,
-        "Lasso (tuned)": 4.5869670907
+        "Boosting (absolute) (tuned)": 3.9433163011,
+        "Decision Tree (initial)": 4.6335169992,
+        "Ridge (initial)": 8.3041105762
       },
       {
         "Fold": 2,
-        "Boosting (absolute) (tuned)": 4.899217515,
-        "Lasso (tuned)": 4.7706387701
+        "Boosting (absolute) (tuned)": 4.8901567342,
+        "Decision Tree (initial)": 5.9422180592,
+        "Ridge (initial)": 6.4308456548
       },
       {
         "Fold": 3,
-        "Boosting (absolute) (tuned)": 6.5251635953,
-        "Lasso (tuned)": 6.3436227307
+        "Boosting (absolute) (tuned)": 6.5134116258,
+        "Decision Tree (initial)": 6.3103676703,
+        "Ridge (initial)": 6.3122929822
       },
       {
         "Fold": 4,
-        "Boosting (absolute) (tuned)": 7.3379030768,
-        "Lasso (tuned)": 6.9545851134
+        "Boosting (absolute) (tuned)": 7.3427142983,
+        "Decision Tree (initial)": 7.0388456221,
+        "Ridge (initial)": 6.8512304161
       },
       {
         "Fold": 5,
-        "Boosting (absolute) (tuned)": 5.2728591072,
-        "Lasso (tuned)": 5.5965809026
+        "Boosting (absolute) (tuned)": 5.2727321411,
+        "Decision Tree (initial)": 5.6790402394,
+        "Ridge (initial)": 5.9025105449
       }
     ],
     "month_ablation": [
       {
         "Model": "Boosting (absolute) (tuned)",
         "Features": "With month",
-        "CV MAE": 5.5951225273,
-        "Fold SD": 1.2023539489,
-        "Validation MAE": 4.2787663467,
-        "Validation RMSE": 6.4097295146,
-        "Validation R2": 0.2613716248,
+        "CV MAE": 5.5924662201,
+        "Fold SD": 1.2022206724,
+        "Validation MAE": 4.2740019331,
+        "Validation RMSE": 6.4075102265,
+        "Validation R2": 0.2618830177,
         "Change in CV MAE": 0.0,
         "Change in Validation MAE": 0.0
       },
       {
         "Model": "Boosting (absolute) (tuned)",
         "Features": "Without month",
-        "CV MAE": 5.4828350408,
-        "Fold SD": 1.2129925641,
-        "Validation MAE": 4.4292171772,
-        "Validation RMSE": 6.3782292662,
-        "Validation R2": 0.2686136792,
-        "Change in CV MAE": -0.1122874865,
-        "Change in Validation MAE": 0.1504508305
+        "CV MAE": 5.4829177589,
+        "Fold SD": 1.215204251,
+        "Validation MAE": 4.4293730154,
+        "Validation RMSE": 6.3794361673,
+        "Validation R2": 0.2683368643,
+        "Change in CV MAE": -0.1095484612,
+        "Change in Validation MAE": 0.1553710823
       },
       {
-        "Model": "Lasso (tuned)",
+        "Model": "Ridge (initial)",
         "Features": "With month",
-        "CV MAE": 5.6504789215,
-        "Fold SD": 0.9043475441,
-        "Validation MAE": 5.0667851991,
-        "Validation RMSE": 6.7723674337,
-        "Validation R2": 0.1754298542,
+        "CV MAE": 6.7601980348,
+        "Fold SD": 0.8290564018,
+        "Validation MAE": 4.6265015167,
+        "Validation RMSE": 6.5859495134,
+        "Validation R2": 0.2201997397,
         "Change in CV MAE": 0.0,
         "Change in Validation MAE": 0.0
       },
       {
-        "Model": "Lasso (tuned)",
+        "Model": "Ridge (initial)",
         "Features": "Without month",
-        "CV MAE": 5.6609677251,
-        "Fold SD": 0.9048323836,
-        "Validation MAE": 5.507444458,
-        "Validation RMSE": 7.0726629865,
-        "Validation R2": 0.1006836064,
-        "Change in CV MAE": 0.0104888036,
-        "Change in Validation MAE": 0.4406592589
+        "CV MAE": 5.5692820499,
+        "Fold SD": 0.903698959,
+        "Validation MAE": 5.4553950212,
+        "Validation RMSE": 7.0519902536,
+        "Validation R2": 0.1059331587,
+        "Change in CV MAE": -1.1909159849,
+        "Change in Validation MAE": 0.8288935045
+      },
+      {
+        "Model": "Decision Tree (initial)",
+        "Features": "With month",
+        "CV MAE": 5.920797718,
+        "Fold SD": 0.7896572702,
+        "Validation MAE": 4.7639877724,
+        "Validation RMSE": 6.6232115591,
+        "Validation R2": 0.2113508555,
+        "Change in CV MAE": 0.0,
+        "Change in Validation MAE": 0.0
+      },
+      {
+        "Model": "Decision Tree (initial)",
+        "Features": "Without month",
+        "CV MAE": 5.630194947,
+        "Fold SD": 0.8493021889,
+        "Validation MAE": 5.4934858929,
+        "Validation RMSE": 7.2601767823,
+        "Validation R2": 0.0523652611,
+        "Change in CV MAE": -0.2906027711,
+        "Change in Validation MAE": 0.7294981205
       }
     ],
     "final_test": [
       {
         "Model": "Boosting (absolute) (tuned)",
-        "MAE": 3.8630441051,
-        "RMSE": 5.1333396153,
-        "R2": 0.0866784715
+        "MAE": 3.8635795098,
+        "RMSE": 5.1313876043,
+        "R2": 0.0873729413
       },
       {
         "Model": "Mean benchmark (initial)",
