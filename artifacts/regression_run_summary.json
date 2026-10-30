@@ -1271,6 +1271,13 @@
         "RMSE": 12.0912009392,
         "R2": -4.0671361878
       }
+    ],
+    "residual_diagnostics": [
+      {
+        "Model": "Boosting (absolute) (tuned)",
+        "Mean residual (days)": -1.8369528504,
+        "P90 absolute error (days)": 7.3250006834
+      }
     ]
   }
 }
