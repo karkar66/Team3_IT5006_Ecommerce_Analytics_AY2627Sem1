@@ -584,43 +584,38 @@ def zip_distance_km(customer_zip, seller_zip):
     return round(float(haversine_km(lat1, lon1, lat2, lon2)), 2)
 
 
-# Real delivered orders from the reserved test period (Jul-Aug 2018, unseen in training),
+# Feature values of real orders from the reserved test period (Jul-Aug 2018, unseen in training),
 # aggregated with the notebook's feature builder. Keys match the prediction form's widget keys.
 SAMPLE_ORDERS = [
-    {"label": "Small: 1 health & beauty item", "order_id": "038f8b45fafa1130d2557e5b8dfd5d71",
-     "actual_days": 2.25, "values": {
+    {"label": "Small: 1 health & beauty item", "order_id": "038f8b45fafa1130d2557e5b8dfd5d71", "values": {
          "pred_purchased_at": "2018-07-22 13:00:04", "pred_n_items": 1, "pred_n_unique_products": 1,
          "pred_n_product_categories": 1, "pred_n_sellers": 1, "pred_n_seller_states": 1,
          "pred_main_product_category": "health_beauty", "pred_total_price": 19.99, "pred_total_freight": 7.40,
          "pred_total_product_weight_g": 50.0, "pred_total_physical_score": 225000.0,
          "pred_customer_zip": "05466", "pred_seller_zip": "13481",
          "pred_farthest_seller_state": "SP", "pred_is_interstate": "False"}},
-    {"label": "Heavy single: 1 musical instrument (30 kg)", "order_id": "029c545413b10a6bd7540401f6eef0a3",
-     "actual_days": 9.96, "values": {
+    {"label": "Heavy single: 1 musical instrument (30 kg)", "order_id": "029c545413b10a6bd7540401f6eef0a3", "values": {
          "pred_purchased_at": "2018-07-10 17:16:33", "pred_n_items": 1, "pred_n_unique_products": 1,
          "pred_n_product_categories": 1, "pred_n_sellers": 1, "pred_n_seller_states": 1,
          "pred_main_product_category": "musical_instruments", "pred_total_price": 1350.00,
          "pred_total_freight": 294.76, "pred_total_product_weight_g": 30000.0,
          "pred_total_physical_score": 6480000000.0, "pred_customer_zip": "71680", "pred_seller_zip": "18060",
          "pred_farthest_seller_state": "SP", "pred_is_interstate": "True"}},
-    {"label": "Multiple: 3 identical computer accessories", "order_id": "00a57dfbb049fbaae10763e2cf15f797",
-     "actual_days": 10.34, "values": {
+    {"label": "Multiple: 3 identical computer accessories", "order_id": "00a57dfbb049fbaae10763e2cf15f797", "values": {
          "pred_purchased_at": "2018-07-20 11:09:30", "pred_n_items": 3, "pred_n_unique_products": 1,
          "pred_n_product_categories": 1, "pred_n_sellers": 1, "pred_n_seller_states": 1,
          "pred_main_product_category": "computers_accessories", "pred_total_price": 269.70,
          "pred_total_freight": 67.68, "pred_total_product_weight_g": 1551.0,
          "pred_total_physical_score": 4879446.0, "pred_customer_zip": "79002", "pred_seller_zip": "87114",
          "pred_farthest_seller_state": "PR", "pred_is_interstate": "True"}},
-    {"label": "Mixed: 4 items from 2 sellers in 2 states", "order_id": "0c0aeabd6ae9d7a303af615334a220d0",
-     "actual_days": 7.18, "values": {
+    {"label": "Mixed: 4 items from 2 sellers in 2 states", "order_id": "0c0aeabd6ae9d7a303af615334a220d0", "values": {
          "pred_purchased_at": "2018-08-20 14:45:48", "pred_n_items": 4, "pred_n_unique_products": 2,
          "pred_n_product_categories": 2, "pred_n_sellers": 2, "pred_n_seller_states": 2,
          "pred_main_product_category": "housewares", "pred_total_price": 264.84, "pred_total_freight": 77.53,
          "pred_total_product_weight_g": 2300.0, "pred_total_physical_score": 21569800.0,
          "pred_customer_zip": "01456", "pred_seller_zip": "95020",
          "pred_farthest_seller_state": "RS", "pred_is_interstate": "True"}},
-    {"label": "Big: 6 phones shipped 2,300 km", "order_id": "03aba68b07658f28f29612641f08d4ba",
-     "actual_days": 13.05, "values": {
+    {"label": "Big: 6 phones shipped 2,300 km", "order_id": "03aba68b07658f28f29612641f08d4ba", "values": {
          "pred_purchased_at": "2018-08-08 14:27:15", "pred_n_items": 6, "pred_n_unique_products": 1,
          "pred_n_product_categories": 1, "pred_n_sellers": 1, "pred_n_seller_states": 1,
          "pred_main_product_category": "telephony", "pred_total_price": 1020.00, "pred_total_freight": 182.64,
@@ -630,10 +625,15 @@ SAMPLE_ORDERS = [
 ]
 
 
+def sample_purchased_at(original):
+    """Today's date at the sample's original time of day, so samples read as new checkouts."""
+    return datetime.combine(datetime.now().date(), pd.Timestamp(original).time())
+
+
 def load_sample_into_form(sample):
     """Button callback: runs before the rerun, so the form widgets pick up these values."""
     values = dict(sample["values"])
-    purchased_at = pd.Timestamp(values.pop("pred_purchased_at"))
+    purchased_at = sample_purchased_at(values.pop("pred_purchased_at"))
     st.session_state["pred_purchase_date"] = purchased_at.date()
     st.session_state["pred_purchase_time"] = purchased_at.time().replace(second=0)
     st.session_state.update(values)
@@ -642,13 +642,11 @@ def load_sample_into_form(sample):
 
 def render_sample_orders():
     st.subheader("Sample Orders")
-    st.caption(
-        "Real delivered orders from the test period (Jul–Aug 2018), which the model never saw in training. "
-        "Load one into the form above and press Predict to compare with the actual delivery time."
-    )
+    st.caption("Example orders to try. Click Load sample to fill the form, then press Predict Delivery Days.")
     table = pd.DataFrame([
-        {"Sample": s["label"], **{k.removeprefix("pred_"): v for k, v in s["values"].items()},
-         "actual_delivery_days": s["actual_days"]}
+        # Purchase date/time is left out here; Load sample fills it into the form instead.
+        {"Sample": s["label"],
+         **{k.removeprefix("pred_"): v for k, v in s["values"].items() if k != "pred_purchased_at"}}
         for s in SAMPLE_ORDERS
     ])
     st.dataframe(table, hide_index=True, use_container_width=True)
@@ -685,7 +683,7 @@ def render_prediction_tab():
 
     loaded = next((s for s in SAMPLE_ORDERS if s["order_id"] == st.session_state.get("pred_loaded_sample")), None)
     if loaded:
-        st.info(f"Loaded sample: {loaded['label']} — actual delivery took {loaded['actual_days']:.1f} days.")
+        st.info(f"Loaded sample: {loaded['label']}.")
 
     with st.form("prediction_form"):
         st.markdown("**Purchase**")
@@ -738,7 +736,7 @@ def render_prediction_tab():
         submit_prediction(
             purchase_date, purchase_time, n_items, n_unique_products, n_product_categories, n_sellers,
             n_seller_states, main_product_category, total_price, total_freight, total_product_weight_g,
-            total_physical_score, customer_zip, seller_zip, farthest_seller_state, is_interstate, loaded,
+            total_physical_score, customer_zip, seller_zip, farthest_seller_state, is_interstate,
         )
 
     st.divider()
@@ -747,8 +745,7 @@ def render_prediction_tab():
 
 def submit_prediction(purchase_date, purchase_time, n_items, n_unique_products, n_product_categories, n_sellers,
                       n_seller_states, main_product_category, total_price, total_freight, total_product_weight_g,
-                      total_physical_score, customer_zip, seller_zip, farthest_seller_state, is_interstate,
-                      loaded_sample):
+                      total_physical_score, customer_zip, seller_zip, farthest_seller_state, is_interstate):
 
     counts = {
         "No. of items": n_items, "No. of unique items": n_unique_products,
@@ -813,10 +810,6 @@ def submit_prediction(purchase_date, purchase_time, n_items, n_unique_products, 
     c1.metric("Predicted delivery", f"{days:.1f} days")
     c2.metric("Expected arrival", (purchased_at + pd.Timedelta(days=days)).strftime("%Y-%m-%d"))
     c3.metric("Seller–buyer distance", f"{distance_km:,.0f} km" if distance_km is not None else "typical")
-    if loaded_sample and all(st.session_state.get(k) == v for k, v in loaded_sample["values"].items()
-                             if k != "pred_purchased_at"):
-        st.caption(f"Actual delivery for this sample: {loaded_sample['actual_days']:.1f} days "
-                   f"(prediction off by {days - loaded_sample['actual_days']:+.1f} days).")
     st.caption(f"Model: {result['model_name']} · trained on purchases before {result['training_purchase_cutoff']}")
     with st.expander("Request payload sent to the API"):
         st.json(payload)
