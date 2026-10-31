@@ -680,6 +680,12 @@ def render_prediction_tab():
     st.markdown(
         f"API: [GET /health]({API_BASE_URL}/health) · [GET /docs (Swagger UI)]({API_BASE_URL}/docs#/)"
     )
+    st.info(
+        "**Demo vs. production:** Here, features are entered manually for illustration. A production version "
+        "would compute them automatically from the checkout data (cart, seller and customer addresses) and call "
+        "the `/predict` API in real time. The model was trained on 2016–2018 orders and would need regular "
+        "retraining to stay accurate."
+    )
 
     loaded = next((s for s in SAMPLE_ORDERS if s["order_id"] == st.session_state.get("pred_loaded_sample")), None)
     if loaded:
